@@ -1,0 +1,1689 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignaCard - Email Signature Card Builder</title>
+  <meta name="description" content="SignaCard is a free local email signature card builder for creating customizable HTML email signatures with business-card style templates.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111827'/%3E%3Cpath d='M14 20h36v24H14z' fill='%23fff'/%3E%3Cpath d='M14 20l18 14 18-14' fill='none' stroke='%23f4c763' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --panel-strong: #fbfbfc;
+      --text: #0f172a;
+      --muted: #667085;
+      --line: #e5e7eb;
+      --soft: #eef1f5;
+      --accent: #0f172a;
+      --coffee: #f4c763;
+      --shadow: 0 20px 45px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+      color-scheme: light dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111315;
+        --panel: #1b1d20;
+        --panel-strong: #202328;
+        --text: #f4f0ea;
+        --muted: #a3acba;
+        --line: #323741;
+        --soft: #242832;
+        --accent: #f4f0ea;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+    button, input, textarea, select {
+      font: inherit;
+      color: inherit;
+    }
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 360px;
+      height: 100vh;
+      min-height: 0;
+    }
+    .sidebar,
+    .inspector {
+      min-height: 0;
+      overflow: auto;
+      background: var(--panel);
+      border-color: var(--line);
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 22px;
+    }
+    .inspector {
+      border-left: 1px solid var(--line);
+      padding: 20px;
+    }
+    .workspace {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .topbar {
+      min-height: 76px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: #111827;
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      letter-spacing: -0.08em;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+      flex: 0 0 auto;
+    }
+    .brand-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .brand-subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn {
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--text);
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: var(--panel);
+    }
+    .btn.coffee {
+      background: var(--coffee);
+      color: #231a0d;
+    }
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .template-list {
+      display: grid;
+      gap: 12px;
+    }
+    .design-tools {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .design-tools input,
+    .design-tools select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-strong);
+      padding: 9px 11px;
+      outline: none;
+      font-weight: 700;
+    }
+    .template-card {
+      width: 100%;
+      padding: 12px;
+      text-align: left;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .template-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+    .template-name {
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+    .template-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .mini-preview {
+      height: 78px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      display: grid;
+      place-items: center;
+      transform: translateZ(0);
+    }
+    .swatch {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #ffffff;
+    }
+    .swatch-photo {
+      position: absolute;
+      left: 14px;
+      top: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #cbd5e1, #64748b);
+    }
+    .swatch-line {
+      position: absolute;
+      left: 58px;
+      height: 8px;
+      border-radius: 999px;
+      background: #111827;
+    }
+    .swatch-line.one { top: 22px; width: 96px; }
+    .swatch-line.two { top: 36px; width: 68px; opacity: 0.36; }
+    .swatch-line.three { top: 54px; width: 132px; height: 5px; opacity: 0.25; }
+    .swatch-band {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 18px;
+      background: var(--swatch-accent);
+    }
+    .swatch.ivory-letterpress {
+      background: #fff9ed;
+      border: 1px solid #d7c8b4;
+    }
+    .swatch.blueprint {
+      background-color: #f8fbff;
+      background-image: linear-gradient(90deg, rgba(37, 99, 235, .16) 1px, transparent 1px), linear-gradient(rgba(37, 99, 235, .16) 1px, transparent 1px);
+      background-size: 10px 10px;
+    }
+    .swatch.gallery {
+      background: #ffffff;
+    }
+    .swatch.gallery::before {
+      content: "";
+      position: absolute;
+      left: 48px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #d9dde5;
+    }
+    .swatch.ember,
+    .swatch.tech-chip {
+      background: #111214;
+    }
+    .swatch.ember .swatch-line,
+    .swatch.tech-chip .swatch-line {
+      background: #ffffff;
+    }
+    .swatch.mono-lux {
+      background: #ffffff;
+      box-shadow: inset 0 0 0 2px #111111;
+    }
+    .swatch.sunrise-tab::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 54px;
+      background: var(--swatch-accent);
+    }
+    .swatch.botanical { background: #fbfdf8; }
+    .swatch.publisher::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 18px;
+      background: #f5f1ff;
+      border-bottom: 1px solid #ded7ef;
+    }
+    .swatch.corner-office .swatch-band {
+      height: 16px;
+    }
+    .swatch.soft-shadow {
+      background: #fff7fb;
+    }
+    .swatch.medieval-guild {
+      background: #f8eed8;
+      box-shadow: inset 0 0 0 2px #8b5e34;
+    }
+    .swatch.medieval-guild::after {
+      content: "";
+      position: absolute;
+      right: 14px;
+      top: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--swatch-accent);
+      opacity: 0.9;
+    }
+    .swatch.space-opera {
+      background:
+        radial-gradient(circle at 24px 18px, #fff 0 1px, transparent 2px),
+        radial-gradient(circle at 88px 38px, #fff 0 1px, transparent 2px),
+        linear-gradient(135deg, #070b18, #111827 60%, #1e1b4b);
+    }
+    .swatch.space-opera .swatch-line,
+    .swatch.wizard-academy .swatch-line,
+    .swatch.creator-neon .swatch-line {
+      background: #ffffff;
+    }
+    .swatch.space-opera::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      height: 3px;
+      background: var(--swatch-accent);
+      box-shadow: 0 0 12px var(--swatch-accent);
+    }
+    .swatch.wizard-academy {
+      background: linear-gradient(135deg, #241431, #43315d);
+    }
+    .swatch.wizard-academy::after {
+      content: "✦";
+      position: absolute;
+      right: 18px;
+      top: 15px;
+      color: var(--swatch-accent);
+      font-size: 24px;
+    }
+    .swatch.library-card {
+      background: #f7ecd3;
+      background-image: linear-gradient(#d6c39c 1px, transparent 1px);
+      background-size: 100% 15px;
+    }
+    .swatch.clinic-clean {
+      background: #f8feff;
+    }
+    .swatch.clinic-clean::after {
+      content: "+";
+      position: absolute;
+      right: 16px;
+      top: 12px;
+      color: var(--swatch-accent);
+      font-weight: 900;
+      font-size: 24px;
+    }
+    .swatch.education-seal {
+      background: #fffdf4;
+    }
+    .swatch.education-seal::after {
+      content: "";
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px double var(--swatch-accent);
+    }
+    .swatch.legal-letterhead {
+      background: #ffffff;
+      box-shadow: inset 0 6px 0 var(--swatch-accent);
+    }
+    .swatch.real-estate {
+      background: linear-gradient(90deg, #ffffff 0 62%, #eff6ff 62% 100%);
+    }
+    .swatch.nonprofit {
+      background: #fff8f4;
+    }
+    .swatch.nonprofit::after {
+      content: "●";
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      color: var(--swatch-accent);
+      font-size: 20px;
+    }
+    .swatch.chef-card {
+      background: #fffaf5;
+      background-image: repeating-linear-gradient(45deg, rgba(185, 28, 28, .12) 0 6px, transparent 6px 14px);
+    }
+    .swatch.creator-neon {
+      background: #101014;
+      box-shadow: inset 0 0 0 2px var(--swatch-accent);
+    }
+    .swatch.therapist-calm {
+      background: linear-gradient(135deg, #f8fbf8, #eef7f1);
+    }
+    .swatch.finance-ledger {
+      background: #f9faf7;
+      background-image: linear-gradient(90deg, rgba(22, 101, 52, .12) 1px, transparent 1px);
+      background-size: 22px 100%;
+    }
+    .swatch.trades-badge {
+      background: #111827;
+    }
+    .swatch.trades-badge .swatch-line {
+      background: #ffffff;
+    }
+    .stage {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      padding: 32px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .preview-shell {
+      width: min(760px, 100%);
+      display: grid;
+      gap: 16px;
+    }
+    .preview-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .preview-card {
+      width: 100%;
+      min-height: 260px;
+      padding: 28px;
+      border-radius: 22px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      overflow: auto;
+    }
+    .signature-output {
+      width: fit-content;
+      max-width: 100%;
+      background: transparent;
+    }
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-strong);
+      padding: 10px 12px;
+      outline: none;
+    }
+    .field textarea {
+      resize: vertical;
+      min-height: 76px;
+    }
+    .field input[type="color"] {
+      padding: 4px;
+      height: 44px;
+    }
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 12px 0 0;
+    }
+    .mobile-tabs {
+      display: none;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      padding: 8px;
+      gap: 8px;
+    }
+    .mobile-tabs button {
+      flex: 1;
+      min-height: 42px;
+      border-radius: 999px;
+      background: var(--soft);
+      font-weight: 900;
+    }
+    .mobile-tabs button.active {
+      background: var(--accent);
+      color: var(--panel);
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      background: #111827;
+      color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 20;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .hidden-file {
+      display: none;
+    }
+
+    @media (max-width: 980px) {
+      body { overflow: hidden; }
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+      .sidebar,
+      .inspector {
+        display: none;
+        position: fixed;
+        inset: 76px 0 58px;
+        z-index: 10;
+        border: 0;
+      }
+      body.show-templates .sidebar,
+      body.show-details .inspector {
+        display: block;
+      }
+      .workspace {
+        grid-row: 2;
+      }
+      .topbar {
+        min-height: 76px;
+        grid-row: 1;
+        padding: 12px;
+      }
+      .brand-title {
+        font-size: 21px;
+      }
+      .brand-subtitle {
+        font-size: 10px;
+      }
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+      }
+      .stage {
+        padding: 18px;
+        place-items: start center;
+      }
+      .preview-card {
+        min-height: 220px;
+        padding: 16px;
+      }
+      #export-json,
+      #import-json {
+        display: none;
+      }
+      .mobile-tabs {
+        display: flex;
+        grid-row: 3;
+      }
+      .inspector,
+      .sidebar {
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar {
+        align-items: flex-start;
+      }
+      .brand {
+        align-items: flex-start;
+      }
+      .brand-title {
+        font-size: 20px;
+      }
+      .top-actions .btn.primary {
+        min-width: 86px;
+      }
+      .preview-card {
+        justify-content: flex-start;
+      }
+      .signature-output {
+        transform: scale(0.92);
+        transform-origin: top left;
+      }
+      .two {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="templates-panel">
+      <h2 class="section-title">Card Designs</h2>
+      <div class="design-tools">
+        <input id="design-search" type="search" placeholder="Search 100 designs">
+        <select id="category-filter" aria-label="Filter designs by category">
+          <option value="all">All categories</option>
+        </select>
+      </div>
+      <div class="template-list" id="template-list"></div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">SC</div>
+          <div>
+            <h1 class="brand-title">SignaCard</h1>
+            <p class="brand-subtitle">Email signature cards</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="btn" type="button" id="export-json">Backup</button>
+          <button class="btn" type="button" id="import-json">Import</button>
+          <button class="btn" type="button" id="copy-html">Copy HTML</button>
+          <button class="btn primary" type="button" id="copy-rich">Copy</button>
+        </div>
+      </header>
+      <section class="stage">
+        <div class="preview-shell">
+          <div class="preview-label">
+            <span>Signature preview</span>
+            <span id="mode-note">Locked colors for email clients</span>
+          </div>
+          <div class="preview-card">
+            <div class="signature-output" id="signature-preview"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="inspector" id="details-panel">
+      <h2 class="section-title">Details</h2>
+      <form class="form-grid" id="details-form">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" name="name" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" name="title">
+        </div>
+        <div class="field">
+          <label for="company">Company</label>
+          <input id="company" name="company">
+        </div>
+        <div class="field">
+          <label for="photo">Photo URL</label>
+          <input id="photo" name="photo" inputmode="url">
+        </div>
+        <div class="field">
+          <label for="logo">Logo URL or Text</label>
+          <input id="logo" name="logo">
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" inputmode="email">
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" inputmode="tel">
+          </div>
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="website">Website</label>
+            <input id="website" name="website" inputmode="url">
+          </div>
+          <div class="field">
+            <label for="location">Location</label>
+            <input id="location" name="location">
+          </div>
+        </div>
+        <div class="field">
+          <label for="tagline">Tagline</label>
+          <textarea id="tagline" name="tagline"></textarea>
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="accent">Accent</label>
+            <input id="accent" name="accent" type="color">
+          </div>
+          <div class="field">
+            <label for="colorMode">Signature Colors</label>
+            <select id="colorMode" name="colorMode">
+              <option value="locked-light">Locked light</option>
+              <option value="locked-dark">Locked dark</option>
+              <option value="auto">Let email client decide</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="photoStyle">Photo Shape</label>
+          <select id="photoStyle" name="photoStyle">
+            <option value="template">Use design default</option>
+            <option value="circle">Circle</option>
+            <option value="soft">Soft rounded</option>
+            <option value="square">Square</option>
+          </select>
+        </div>
+        <p class="hint">Signatures are exported as inline, table-based HTML. Locked modes use explicit colors so your signature does not change just because the viewer uses dark mode.</p>
+      </form>
+      <input class="hidden-file" type="file" accept="application/json" id="json-file">
+    </aside>
+
+    <nav class="mobile-tabs" aria-label="Mobile panels">
+      <button type="button" id="tab-templates">Designs</button>
+      <button type="button" id="tab-preview" class="active">Preview</button>
+      <button type="button" id="tab-details">Details</button>
+    </nav>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'signacard.v2';
+    const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+    const defaultPhoto = '';
+
+    const templates = [
+      { id: 'slate-band', name: 'Slate Band', category: 'Executive', family: 'band', note: 'Executive identity card with a bold company strip.', accent: '#ef5b49', mode: 'locked-dark' },
+      { id: 'ivory-letterpress', name: 'Ivory Letterpress', category: 'Professional', family: 'editorial', note: 'Warm paper, quiet border, classic business card tone.', accent: '#9b6a3f', mode: 'locked-light' },
+      { id: 'blueprint', name: 'Blueprint', category: 'Technical', family: 'grid', note: 'Architectural grid and precise contact blocks.', accent: '#2563eb', mode: 'locked-light' },
+      { id: 'gallery', name: 'Gallery Label', category: 'Creative', family: 'minimal', note: 'Minimal white label with museum-style typography.', accent: '#111827', mode: 'locked-light' },
+      { id: 'ember', name: 'Ember Edge', category: 'Executive', family: 'band', note: 'Dark card, warm edge, strong founder profile.', accent: '#f97316', mode: 'locked-dark' },
+      { id: 'botanical', name: 'Botanical', category: 'Care', family: 'soft', note: 'Soft green signature card for wellness or education.', accent: '#2f7d55', mode: 'locked-light' },
+      { id: 'mono-lux', name: 'Mono Lux', category: 'Professional', family: 'minimal', note: 'Black and white luxury card with restrained contrast.', accent: '#111111', mode: 'locked-light' },
+      { id: 'sunrise-tab', name: 'Sunrise Tab', category: 'Friendly', family: 'split', note: 'Rounded photo tab and optimistic color block.', accent: '#f4b740', mode: 'locked-light' },
+      { id: 'tech-chip', name: 'Tech Chip', category: 'Technical', family: 'darkline', note: 'Compact card with circuit-like detail for tech teams.', accent: '#14b8a6', mode: 'locked-dark' },
+      { id: 'publisher', name: 'Publisher', category: 'Creative', family: 'editorial', note: 'Editorial masthead styling for writers and newsletters.', accent: '#7c3aed', mode: 'locked-light' },
+      { id: 'corner-office', name: 'Corner Office', category: 'Executive', family: 'band', note: 'Corporate card with strong name block and logo row.', accent: '#0f766e', mode: 'locked-light' },
+      { id: 'soft-shadow', name: 'Soft Shadow', category: 'Friendly', family: 'soft', note: 'Friendly modern card with dimensional contact chips.', accent: '#e8799a', mode: 'locked-light' },
+      { id: 'medieval-guild', name: 'Medieval Guild', category: 'Themed', family: 'seal', note: 'Parchment, seal, and heraldic energy without the costume-shop feel.', accent: '#9f2d20', mode: 'locked-light' },
+      { id: 'space-opera', name: 'Space Opera', category: 'Themed', family: 'darkline', note: 'Cinematic deep-space command card with a luminous accent line.', accent: '#38bdf8', mode: 'locked-dark' },
+      { id: 'wizard-academy', name: 'Wizard Academy', category: 'Themed', family: 'seal', note: 'Deep academic purple, crest-like layout, and a little magic.', accent: '#facc15', mode: 'locked-dark' },
+      { id: 'library-card', name: 'Library Card', category: 'Education', family: 'editorial', note: 'Catalog-card warmth for librarians, archivists, and writers.', accent: '#7c2d12', mode: 'locked-light' },
+      { id: 'clinic-clean', name: 'Clinic Clean', category: 'Healthcare', family: 'soft', note: 'Calm, clear healthcare styling for doctors and clinics.', accent: '#0891b2', mode: 'locked-light' },
+      { id: 'education-seal', name: 'Education Seal', category: 'Education', family: 'seal', note: 'Institutional, polished, and right for schools or departments.', accent: '#b91c1c', mode: 'locked-light' },
+      { id: 'legal-letterhead', name: 'Legal Letterhead', category: 'Legal', family: 'letterhead', note: 'Crisp letterhead style for attorneys and consultants.', accent: '#1f2937', mode: 'locked-light' },
+      { id: 'real-estate', name: 'Real Estate', category: 'Real Estate', family: 'split', note: 'Premium listing-card look with room for direct contact info.', accent: '#2563eb', mode: 'locked-light' },
+      { id: 'nonprofit', name: 'Nonprofit Warmth', category: 'Nonprofit', family: 'soft', note: 'Approachable, human, and mission-forward without clutter.', accent: '#dc6b3a', mode: 'locked-light' },
+      { id: 'chef-card', name: 'Chef Card', category: 'Hospitality', family: 'editorial', note: 'Restaurant and hospitality card with a warm editorial feel.', accent: '#b91c1c', mode: 'locked-light' },
+      { id: 'creator-neon', name: 'Creator Neon', category: 'Creative', family: 'darkline', note: 'Dark, punchy profile card for creators and media work.', accent: '#d946ef', mode: 'locked-dark' },
+      { id: 'therapist-calm', name: 'Therapist Calm', category: 'Care', family: 'soft', note: 'Soft trust-building styling for counseling and care roles.', accent: '#5b8f7a', mode: 'locked-light' },
+      { id: 'finance-ledger', name: 'Finance Ledger', category: 'Finance', family: 'grid', note: 'Ledger-inspired card for accountants and financial advisors.', accent: '#166534', mode: 'locked-light' },
+      { id: 'trades-badge', name: 'Trades Badge', category: 'Trades', family: 'darkline', note: 'Strong badge-style card for contractors and field service.', accent: '#f59e0b', mode: 'locked-dark' }
+    ];
+
+    templates.push(
+      { id: 'ceo-black-card', name: 'CEO Black Card', category: 'Executive', family: 'darkline', note: 'High-contrast executive card for founders and C-suite.', accent: '#d4af37', mode: 'locked-dark' },
+      { id: 'boardroom-brass', name: 'Boardroom Brass', category: 'Executive', family: 'band', note: 'Formal leadership card with a confident brass accent.', accent: '#b7791f', mode: 'locked-light' },
+      { id: 'investor-memo', name: 'Investor Memo', category: 'Executive', family: 'letterhead', note: 'Memo-like signature for finance and investor relations.', accent: '#0f172a', mode: 'locked-light' },
+      { id: 'founder-note', name: 'Founder Note', category: 'Executive', family: 'editorial', note: 'Personal founder card with editorial warmth.', accent: '#be123c', mode: 'locked-light' },
+      { id: 'sales-velocity', name: 'Sales Velocity', category: 'Sales', family: 'split', note: 'Energetic card for sales, outreach, and account teams.', accent: '#ea580c', mode: 'locked-light' },
+      { id: 'account-strategist', name: 'Account Strategist', category: 'Sales', family: 'band', note: 'Polished customer-facing account signature.', accent: '#2563eb', mode: 'locked-light' },
+      { id: 'customer-success', name: 'Customer Success', category: 'Sales', family: 'soft', note: 'Friendly support-forward card for success teams.', accent: '#16a34a', mode: 'locked-light' },
+      { id: 'demo-booking', name: 'Demo Booking', category: 'Sales', family: 'pill', note: 'CTA-styled card for reps who want replies and meetings.', accent: '#7c3aed', mode: 'locked-light' },
+      { id: 'help-desk', name: 'Help Desk', category: 'Support', family: 'grid', note: 'Clear support card with ticket-friendly structure.', accent: '#0ea5e9', mode: 'locked-light' },
+      { id: 'support-human', name: 'Support Human', category: 'Support', family: 'soft', note: 'Warm support signature that feels less automated.', accent: '#f97316', mode: 'locked-light' },
+      { id: 'success-minimal', name: 'Success Minimal', category: 'Support', family: 'minimal', note: 'Lean success-team signature with strong hierarchy.', accent: '#475569', mode: 'locked-light' },
+      { id: 'hr-welcome', name: 'HR Welcome', category: 'HR', family: 'soft', note: 'Approachable card for recruiting and people teams.', accent: '#ec4899', mode: 'locked-light' },
+      { id: 'recruiter-card', name: 'Recruiter Card', category: 'HR', family: 'split', note: 'Recruiting signature with direct contact emphasis.', accent: '#8b5cf6', mode: 'locked-light' },
+      { id: 'people-ops', name: 'People Ops', category: 'HR', family: 'pill', note: 'Soft internal-communications card for HR.', accent: '#0d9488', mode: 'locked-light' },
+      { id: 'attorney-classic', name: 'Attorney Classic', category: 'Legal', family: 'letterhead', note: 'Conservative attorney signature with legal letterhead cues.', accent: '#111827', mode: 'locked-light' },
+      { id: 'law-firm-gold', name: 'Law Firm Gold', category: 'Legal', family: 'band', note: 'Traditional legal card with gold accent authority.', accent: '#a16207', mode: 'locked-dark' },
+      { id: 'compliance-clean', name: 'Compliance Clean', category: 'Legal', family: 'minimal', note: 'Compliance and governance signature with minimal risk.', accent: '#334155', mode: 'locked-light' },
+      { id: 'doctor-direct', name: 'Doctor Direct', category: 'Healthcare', family: 'soft', note: 'Direct physician card with calm clinical clarity.', accent: '#0284c7', mode: 'locked-light' },
+      { id: 'dental-bright', name: 'Dental Bright', category: 'Healthcare', family: 'pill', note: 'Clean, bright signature for dental practices.', accent: '#06b6d4', mode: 'locked-light' },
+      { id: 'clinic-admin', name: 'Clinic Admin', category: 'Healthcare', family: 'grid', note: 'Operational clinic signature for administrative teams.', accent: '#0f766e', mode: 'locked-light' },
+      { id: 'nurse-care', name: 'Nurse Care', category: 'Healthcare', family: 'soft', note: 'Care-team card with humane warmth.', accent: '#db2777', mode: 'locked-light' },
+      { id: 'professor-card', name: 'Professor Card', category: 'Education', family: 'editorial', note: 'Academic signature for faculty and research staff.', accent: '#7c2d12', mode: 'locked-light' },
+      { id: 'student-portfolio', name: 'Student Portfolio', category: 'Education', family: 'minimal', note: 'Student signature for internships and applications.', accent: '#2563eb', mode: 'locked-light' },
+      { id: 'department-office', name: 'Department Office', category: 'Education', family: 'seal', note: 'School department card with institutional feel.', accent: '#991b1b', mode: 'locked-light' },
+      { id: 'alumni-network', name: 'Alumni Network', category: 'Education', family: 'band', note: 'Alumni and advancement signature with club polish.', accent: '#1d4ed8', mode: 'locked-light' },
+      { id: 'librarian-modern', name: 'Librarian Modern', category: 'Education', family: 'editorial', note: 'Modern library signature with catalog-card structure.', accent: '#92400e', mode: 'locked-light' },
+      { id: 'realtor-premium', name: 'Realtor Premium', category: 'Real Estate', family: 'split', note: 'Premium property-card signature for realtors.', accent: '#1d4ed8', mode: 'locked-light' },
+      { id: 'mortgage-advisor', name: 'Mortgage Advisor', category: 'Real Estate', family: 'letterhead', note: 'Trust-focused card for mortgage and lending teams.', accent: '#0f766e', mode: 'locked-light' },
+      { id: 'property-manager', name: 'Property Manager', category: 'Real Estate', family: 'grid', note: 'Practical property-management signature.', accent: '#64748b', mode: 'locked-light' },
+      { id: 'interior-studio', name: 'Interior Studio', category: 'Real Estate', family: 'editorial', note: 'Interior design and staging signature with studio style.', accent: '#c08457', mode: 'locked-light' },
+      { id: 'accountant-ledger', name: 'Accountant Ledger', category: 'Finance', family: 'grid', note: 'Structured ledger look for accounting professionals.', accent: '#166534', mode: 'locked-light' },
+      { id: 'wealth-advisor', name: 'Wealth Advisor', category: 'Finance', family: 'band', note: 'Premium wealth-management signature.', accent: '#b45309', mode: 'locked-dark' },
+      { id: 'bookkeeper-clean', name: 'Bookkeeper Clean', category: 'Finance', family: 'minimal', note: 'Simple bookkeeping card with no visual noise.', accent: '#365314', mode: 'locked-light' },
+      { id: 'insurance-card', name: 'Insurance Card', category: 'Finance', family: 'soft', note: 'Trustworthy insurance signature with approachable structure.', accent: '#0369a1', mode: 'locked-light' },
+      { id: 'designer-studio', name: 'Designer Studio', category: 'Creative', family: 'editorial', note: 'Studio-style card for designers and creative directors.', accent: '#db2777', mode: 'locked-light' },
+      { id: 'photographer-frame', name: 'Photographer Frame', category: 'Creative', family: 'minimal', note: 'Gallery frame signature for photographers.', accent: '#111827', mode: 'locked-light' },
+      { id: 'video-producer', name: 'Video Producer', category: 'Creative', family: 'darkline', note: 'Dark production-card signature for video teams.', accent: '#ef4444', mode: 'locked-dark' },
+      { id: 'writer-byline', name: 'Writer Byline', category: 'Creative', family: 'editorial', note: 'Publication byline look for writers and editors.', accent: '#7c3aed', mode: 'locked-light' },
+      { id: 'podcast-host', name: 'Podcast Host', category: 'Creative', family: 'pill', note: 'Creator card for hosts, shows, and media brands.', accent: '#f97316', mode: 'locked-dark' },
+      { id: 'developer-terminal', name: 'Developer Terminal', category: 'Technical', family: 'darkline', note: 'Terminal-inspired signature for software roles.', accent: '#22c55e', mode: 'locked-dark' },
+      { id: 'security-ops', name: 'Security Ops', category: 'Technical', family: 'grid', note: 'Security and operations card with precise structure.', accent: '#dc2626', mode: 'locked-dark' },
+      { id: 'product-manager', name: 'Product Manager', category: 'Technical', family: 'pill', note: 'Modern product-team signature with CTA-friendly shape.', accent: '#2563eb', mode: 'locked-light' },
+      { id: 'data-science', name: 'Data Science', category: 'Technical', family: 'grid', note: 'Analytical signature with clean data-card cues.', accent: '#7c3aed', mode: 'locked-light' },
+      { id: 'architect-lines', name: 'Architect Lines', category: 'Technical', family: 'grid', note: 'Architecture and engineering card with plan-line detail.', accent: '#475569', mode: 'locked-light' },
+      { id: 'church-staff', name: 'Church Staff', category: 'Nonprofit', family: 'soft', note: 'Warm ministry staff signature.', accent: '#7c2d12', mode: 'locked-light' },
+      { id: 'fundraiser', name: 'Fundraiser', category: 'Nonprofit', family: 'pill', note: 'Mission-forward card for donor communication.', accent: '#dc6b3a', mode: 'locked-light' },
+      { id: 'community-program', name: 'Community Program', category: 'Nonprofit', family: 'split', note: 'Friendly program-team card for community work.', accent: '#16a34a', mode: 'locked-light' },
+      { id: 'museum-curator', name: 'Museum Curator', category: 'Nonprofit', family: 'editorial', note: 'Curatorial signature with gallery label restraint.', accent: '#4b5563', mode: 'locked-light' },
+      { id: 'restaurant-owner', name: 'Restaurant Owner', category: 'Hospitality', family: 'editorial', note: 'Owner or chef signature with warm food-world character.', accent: '#b91c1c', mode: 'locked-light' },
+      { id: 'hotel-concierge', name: 'Hotel Concierge', category: 'Hospitality', family: 'band', note: 'Hospitality signature with concierge polish.', accent: '#b7791f', mode: 'locked-dark' },
+      { id: 'travel-advisor', name: 'Travel Advisor', category: 'Hospitality', family: 'split', note: 'Travel planning card with premium warmth.', accent: '#0ea5e9', mode: 'locked-light' },
+      { id: 'event-planner', name: 'Event Planner', category: 'Hospitality', family: 'soft', note: 'Elegant event-planning card with friendly presence.', accent: '#c026d3', mode: 'locked-light' },
+      { id: 'contractor-badge', name: 'Contractor Badge', category: 'Trades', family: 'darkline', note: 'Durable contractor signature with badge confidence.', accent: '#f59e0b', mode: 'locked-dark' },
+      { id: 'electrician-card', name: 'Electrician Card', category: 'Trades', family: 'band', note: 'High-visibility card for electricians and field service.', accent: '#eab308', mode: 'locked-dark' },
+      { id: 'plumbing-service', name: 'Plumbing Service', category: 'Trades', family: 'split', note: 'Blue service-card styling for plumbing teams.', accent: '#0284c7', mode: 'locked-light' },
+      { id: 'landscaping-green', name: 'Landscaping Green', category: 'Trades', family: 'soft', note: 'Outdoor-service card with natural green cues.', accent: '#15803d', mode: 'locked-light' },
+      { id: 'fitness-coach', name: 'Fitness Coach', category: 'Care', family: 'band', note: 'Energetic coaching signature with strong contrast.', accent: '#ef4444', mode: 'locked-dark' },
+      { id: 'wellness-guide', name: 'Wellness Guide', category: 'Care', family: 'soft', note: 'Gentle wellness card with calm contact hierarchy.', accent: '#65a30d', mode: 'locked-light' },
+      { id: 'veterinary-care', name: 'Veterinary Care', category: 'Care', family: 'pill', note: 'Friendly care-card styling for clinics and pet services.', accent: '#0d9488', mode: 'locked-light' },
+      { id: 'coach-modern', name: 'Coach Modern', category: 'Care', family: 'minimal', note: 'Clean card for coaches, mentors, and consultants.', accent: '#7c3aed', mode: 'locked-light' },
+      { id: 'film-noir', name: 'Film Noir', category: 'Themed', family: 'darkline', note: 'Black-and-white cinematic signature for dramatic brands.', accent: '#e5e7eb', mode: 'locked-dark' },
+      { id: 'retro-terminal', name: 'Retro Terminal', category: 'Themed', family: 'darkline', note: 'Old-school screen glow without sacrificing readability.', accent: '#84cc16', mode: 'locked-dark' },
+      { id: 'pirate-map', name: 'Mapmaker', category: 'Themed', family: 'editorial', note: 'Explorer-map warmth for adventurous brands.', accent: '#92400e', mode: 'locked-light' },
+      { id: 'royal-decree', name: 'Royal Decree', category: 'Themed', family: 'seal', note: 'Formal seal-and-script card with ceremonial polish.', accent: '#7f1d1d', mode: 'locked-light' },
+      { id: 'cyberpunk-card', name: 'Cyberpunk Card', category: 'Themed', family: 'darkline', note: 'Neon night signature with sharp digital personality.', accent: '#06b6d4', mode: 'locked-dark' },
+      { id: 'desert-modern', name: 'Desert Modern', category: 'Professional', family: 'editorial', note: 'Warm modern card with sun-baked restraint.', accent: '#c2410c', mode: 'locked-light' },
+      { id: 'nordic-minimal', name: 'Nordic Minimal', category: 'Professional', family: 'minimal', note: 'Quiet Scandinavian-style professional signature.', accent: '#64748b', mode: 'locked-light' },
+      { id: 'atlantic-blue', name: 'Atlantic Blue', category: 'Professional', family: 'split', note: 'Cool business card with polished blue structure.', accent: '#1e40af', mode: 'locked-light' },
+      { id: 'olive-office', name: 'Olive Office', category: 'Professional', family: 'soft', note: 'Warm neutral office signature with olive accent.', accent: '#6b7f35', mode: 'locked-light' },
+      { id: 'rose-consultant', name: 'Rose Consultant', category: 'Professional', family: 'pill', note: 'Consultant card with soft rose brand cue.', accent: '#be5877', mode: 'locked-light' },
+      { id: 'clean-grid', name: 'Clean Grid', category: 'Professional', family: 'grid', note: 'Reliable grid card for teams that value order.', accent: '#334155', mode: 'locked-light' },
+      { id: 'quiet-premium', name: 'Quiet Premium', category: 'Professional', family: 'minimal', note: 'Premium signature with very little decoration.', accent: '#111827', mode: 'locked-light' },
+      { id: 'friendly-round', name: 'Friendly Round', category: 'Friendly', family: 'pill', note: 'Rounded approachable signature for everyday business.', accent: '#0ea5e9', mode: 'locked-light' },
+      { id: 'civic-office', name: 'Civic Office', category: 'Professional', family: 'letterhead', note: 'Public-service card for city, county, and civic offices.', accent: '#1d4ed8', mode: 'locked-light' }
+    );
+
+    const defaultState = {
+      template: 'slate-band',
+      name: 'Jordan Carter',
+      title: 'Creative Director',
+      company: 'Northstar Studio',
+      photo: defaultPhoto,
+      logo: 'Northstar Studio',
+      email: 'jordan@example.com',
+      phone: '(555) 010-0147',
+      website: 'example.com',
+      location: 'Anywhere, USA',
+      tagline: 'Clear communication, thoughtful design, and useful work for people who need it.',
+      accent: '#ef5b49',
+      colorMode: 'locked-dark',
+      photoStyle: 'template'
+    };
+
+    let state = loadState();
+    let designSearch = '';
+    let categoryFilter = 'all';
+
+    const $ = (sel) => document.querySelector(sel);
+    const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[char]));
+    const stripProtocol = (value) => String(value || '').replace(/^https?:\/\//i, '').replace(/\/$/, '');
+    const safeUrl = (value, fallback = '') => {
+      const raw = String(value || '').trim();
+      if (!raw) return fallback;
+      if (/^(https?:|mailto:|tel:|data:image\/)/i.test(raw)) return raw;
+      return `https://${raw}`;
+    };
+    const hexToRgb = (hex) => {
+      const clean = String(hex || '#111827').replace('#', '');
+      const value = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+      const n = parseInt(value, 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    };
+    const soft = (hex, alpha = 0.12) => {
+      const { r, g, b } = hexToRgb(hex);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    function loadState() {
+      try {
+        return { ...defaultState, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') };
+      } catch {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function colors() {
+      const template = templates.find(t => t.id === state.template) || templates[0];
+      const mode = state.colorMode || template.mode || 'locked-light';
+      const dark = mode === 'locked-dark';
+      if (mode === 'auto') {
+        return {
+          bg: 'transparent', card: 'transparent', text: '#111827', muted: '#64748b',
+          line: '#d7dde6', accent: state.accent, chip: soft(state.accent, 0.1), inverse: '#ffffff'
+        };
+      }
+      return dark
+        ? { bg: '#111214', card: '#111214', text: '#ffffff', muted: '#9ca3af', line: '#3f3f46', accent: state.accent, chip: soft(state.accent, 0.22), inverse: '#111214' }
+        : { bg: '#ffffff', card: '#ffffff', text: '#101828', muted: '#667085', line: '#dde2ea', accent: state.accent, chip: soft(state.accent, 0.12), inverse: '#ffffff' };
+    }
+
+    function contactLine(c) {
+      const bits = [];
+      if (state.email) bits.push(`<a href="mailto:${escapeHtml(state.email)}" style="color:${c.text}; text-decoration:none;">${escapeHtml(state.email)}</a>`);
+      if (state.phone) bits.push(`<a href="tel:${escapeHtml(state.phone)}" style="color:${c.text}; text-decoration:none;">${escapeHtml(state.phone)}</a>`);
+      if (state.website) bits.push(`<a href="${escapeHtml(safeUrl(state.website))}" style="color:${c.text}; text-decoration:none;">${escapeHtml(stripProtocol(state.website))}</a>`);
+      return bits.join(`<span style="color:${c.muted}; padding:0 7px;">|</span>`);
+    }
+
+    function imageCell(size, radius, borderColor) {
+      const src = escapeHtml(safeUrl(state.photo, transparentPixel));
+      if (state.photoStyle === 'circle') radius = size / 2;
+      if (state.photoStyle === 'soft') radius = 18;
+      if (state.photoStyle === 'square') radius = 0;
+      return `<img src="${src}" width="${size}" height="${size}" alt="" style="display:block; width:${size}px; height:${size}px; border-radius:${radius}px; object-fit:cover; border:1px solid ${borderColor};">`;
+    }
+
+    function logoBlock(c, align = 'left') {
+      const logo = String(state.logo || state.company || '').trim();
+      if (!logo) return '';
+      if (/^https?:\/\//i.test(logo) || /^data:image\//i.test(logo)) {
+        return `<img src="${escapeHtml(logo)}" alt="${escapeHtml(state.company)}" style="display:block; max-width:210px; max-height:52px; margin:${align === 'center' ? '0 auto' : '0'};">`;
+      }
+      return `<div style="font-size:24px; line-height:1; color:${c.inverse}; font-weight:700; letter-spacing:0.02em; text-align:${align};">${escapeHtml(logo)}</div>`;
+    }
+
+    function templateMeta() {
+      return templates.find(t => t.id === state.template) || templates[0];
+    }
+
+    function signatureHtml() {
+      const c = colors();
+      const accent = state.accent;
+      const name = escapeHtml(state.name);
+      const title = escapeHtml(state.title);
+      const company = escapeHtml(state.company);
+      const tagline = escapeHtml(state.tagline);
+      const location = escapeHtml(state.location);
+      const tpl = state.template;
+      const meta = templateMeta();
+
+      if (tpl === 'ivory-letterpress') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:${c.card}; border:1px solid #d7c8b4; border-radius:18px; font-family:Georgia, 'Times New Roman', serif; color:${c.text};">
+          <tr><td style="padding:24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="88" valign="top">${imageCell(76, 38, '#d7c8b4')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:28px; line-height:1.05; font-weight:700; letter-spacing:-0.02em;">${name}</div>
+                <div style="font-family:Arial, sans-serif; color:${c.muted}; font-size:15px; padding-top:4px;">${title}${company ? ` · ${company}` : ''}</div>
+                <div style="height:1px; background:${accent}; width:76px; margin:14px 0;"></div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7;">${contactLine(c)}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'blueprint') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#f8fbff; border:1px solid #bfd2f3; border-radius:16px; font-family:Arial, sans-serif; color:#12315f;">
+          <tr><td style="padding:22px; background-image:linear-gradient(90deg, rgba(37,99,235,.12) 1px, transparent 1px),linear-gradient(rgba(37,99,235,.12) 1px, transparent 1px); background-size:18px 18px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="110" valign="top">${imageCell(88, 12, '#9db9ef')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:12px; text-transform:uppercase; letter-spacing:2px; color:${accent}; font-weight:800;">${company}</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#47658f; padding:5px 0 12px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#12315f', muted: '#6981a4' })}</div>
+                <div style="font-size:12px; color:#6981a4; padding-top:8px;">${location}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'gallery') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%; background:#ffffff; border:1px solid #d9dde5; font-family:Helvetica, Arial, sans-serif; color:#111827;">
+          <tr>
+            <td width="122" valign="top" style="padding:22px; border-right:1px solid #d9dde5;">${imageCell(78, 0, '#d9dde5')}</td>
+            <td valign="top" style="padding:22px;">
+              <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#7b8494; font-weight:800;">${company}</div>
+              <div style="font-size:29px; line-height:1.05; font-weight:800; letter-spacing:-0.04em; padding-top:8px;">${name}</div>
+              <div style="font-size:15px; color:#667085; padding-top:4px;">${title}</div>
+              <div style="padding-top:16px; font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#111827', muted: '#9aa3b2' })}</div>
+            </td>
+          </tr>
+        </table>`;
+
+      if (tpl === 'ember') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#111214; border:1px solid #3f3f46; border-radius:20px; font-family:Arial, sans-serif; color:#ffffff; overflow:hidden;">
+          <tr><td style="padding:22px 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="98" valign="top">${imageCell(82, 18, '#52525b')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:16px; color:#a1a1aa; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#ffffff', muted: '#71717a' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="background:${accent}; padding:15px 24px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
+        </table>`;
+
+      if (tpl === 'botanical') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#fbfdf8; border:1px solid #cddfce; border-radius:24px; font-family:Arial, sans-serif; color:#1d3327;">
+          <tr><td style="padding:24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="102" valign="top">${imageCell(86, 43, '#b9d5be')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:28px; line-height:1.05; font-weight:900;">${name}</div>
+                <div style="font-size:15px; color:#5d7a68; padding-top:4px;">${title}</div>
+                <div style="background:${soft(accent, 0.12)}; color:#27563d; border-radius:999px; display:inline-block; padding:7px 11px; font-size:12px; font-weight:800; margin-top:12px;">${company}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:12px;">${contactLine({ ...c, text: '#1d3327', muted: '#85a28d' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'mono-lux') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:610px; max-width:100%; background:#ffffff; border:2px solid #111111; font-family:Arial, sans-serif; color:#111111;">
+          <tr><td style="padding:20px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="92">${imageCell(74, 0, '#111111')}</td>
+              <td style="padding-left:18px;">
+                <div style="font-size:12px; letter-spacing:3px; text-transform:uppercase; font-weight:900;">${company}</div>
+                <div style="font-size:31px; line-height:1; font-weight:900; padding-top:7px;">${name}</div>
+                <div style="font-size:14px; color:#4b5563; padding-top:5px;">${title}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="border-top:2px solid #111111; padding:12px 20px; font-size:13px;">${contactLine({ ...c, text: '#111111', muted: '#9ca3af' })}</td></tr>
+        </table>`;
+
+      if (tpl === 'sunrise-tab') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#fffaf0; border:1px solid #f1dca6; border-radius:24px; font-family:Arial, sans-serif; color:#251a12;">
+          <tr><td style="padding:0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="150" valign="top" style="background:${accent}; border-radius:24px 0 0 24px; padding:20px;">${imageCell(94, 28, 'rgba(255,255,255,.6)')}</td>
+              <td valign="top" style="padding:23px;">
+                <div style="font-size:30px; line-height:1.05; font-weight:900;">${name}</div>
+                <div style="font-size:15px; color:#806b4b; padding-top:4px;">${title} · ${company}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:14px;">${contactLine({ ...c, text: '#251a12', muted: '#b0905a' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'tech-chip') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#0f172a; border:1px solid #334155; border-radius:16px; font-family:Arial, sans-serif; color:#e2e8f0;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="104" valign="top">${imageCell(82, 16, '#475569')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:11px; letter-spacing:2px; color:${accent}; text-transform:uppercase; font-weight:900;">Verified contact</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#94a3b8; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#e2e8f0', muted: '#64748b' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'publisher') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#fff; border:1px solid #ded7ef; border-radius:12px; font-family:Georgia, 'Times New Roman', serif; color:#181421;">
+          <tr><td style="padding:18px 22px; border-bottom:1px solid #ded7ef; color:${accent}; font-size:24px; font-weight:700;">${escapeHtml(state.logo || company)}</td></tr>
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="86">${imageCell(70, 6, '#ded7ef')}</td>
+              <td style="padding-left:16px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-family:Arial, sans-serif; font-size:15px; color:#6b6477; padding-top:4px;">${title}</div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7; padding-top:10px;">${contactLine({ ...c, text: '#181421', muted: '#9b92aa' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'corner-office') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#ffffff; border:1px solid #cfd8dc; border-radius:10px; font-family:Arial, sans-serif; color:#10231f;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td valign="top">
+                <div style="font-size:31px; line-height:1; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#667085; padding-top:6px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:14px;">${contactLine({ ...c, text: '#10231f', muted: '#94a3b8' })}</div>
+              </td>
+              <td width="96" align="right" valign="top">${imageCell(78, 12, '#cfd8dc')}</td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="background:${accent}; color:#ffffff; padding:12px 22px; border-radius:0 0 10px 10px;">${logoBlock({ ...c, inverse: '#ffffff' })}</td></tr>
+        </table>`;
+
+      if (tpl === 'soft-shadow') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#ffffff; border:1px solid #f2d7df; border-radius:26px; font-family:Arial, sans-serif; color:#241923;">
+          <tr><td style="padding:24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="106" valign="top">${imageCell(86, 24, '#f2d7df')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#765d6b; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:12px;">${contactLine({ ...c, text: '#241923', muted: '#a78b9b' })}</div>
+                <div style="display:inline-block; background:${soft(accent, 0.16)}; color:#5b243c; border-radius:999px; padding:7px 10px; margin-top:10px; font-size:12px; font-weight:800;">${company}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'medieval-guild') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#f8eed8; border:2px solid #8b5e34; border-radius:12px; font-family:Georgia, 'Times New Roman', serif; color:#2b1a10;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="96" valign="top">${imageCell(78, 10, '#8b5e34')}</td>
+              <td valign="top" style="padding-left:16px;">
+                <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:700;">${company}</div>
+                <div style="font-size:31px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-size:15px; color:#725133; padding-top:4px;">${title}</div>
+                <div style="height:3px; background:${accent}; width:110px; margin:12px 0;"></div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#2b1a10', muted: '#9b7652' })}</div>
+              </td>
+              <td width="74" align="right" valign="top"><div style="width:54px; height:54px; border-radius:50%; background:${accent}; color:#fff8e7; font-size:22px; line-height:54px; text-align:center; font-weight:700;">${escapeHtml((state.company || 'G').slice(0,1))}</div></td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'space-opera') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:650px; max-width:100%; background:#070b18; border:1px solid #27314f; border-radius:18px; font-family:Arial, sans-serif; color:#eef6ff;">
+          <tr><td style="padding:22px; background:linear-gradient(135deg,#070b18,#111827 58%,#1e1b4b);">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="104" valign="top">${imageCell(82, 18, '#3b82f6')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:11px; letter-spacing:3px; color:${accent}; text-transform:uppercase; font-weight:900;">Transmission verified</div>
+                <div style="font-size:31px; line-height:1.04; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#9fb2d8; padding-top:4px;">${title} · ${company}</div>
+                <div style="height:2px; background:${accent}; box-shadow:0 0 12px ${accent}; width:180px; margin:13px 0;"></div>
+                <div style="font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#eef6ff', muted: '#617195' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'wizard-academy') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:630px; max-width:100%; background:#241431; border:1px solid #7c6a41; border-radius:18px; font-family:Georgia, 'Times New Roman', serif; color:#fff8db;">
+          <tr><td style="padding:23px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="94" valign="top">${imageCell(76, 38, '#facc15')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:12px; color:${accent}; letter-spacing:2px; text-transform:uppercase; font-weight:700;">Scholarly correspondence</div>
+                <div style="font-size:31px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-family:Arial, sans-serif; font-size:15px; color:#c9bdd8; padding-top:4px;">${title}</div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#fff8db', muted: '#9f8ab4' })}</div>
+              </td>
+              <td width="42" valign="top" align="right"><div style="font-size:28px; color:${accent}; line-height:1;">&#10022;</div></td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'library-card') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#f7ecd3; border:1px solid #b99b67; border-radius:8px; font-family:'Courier New', Courier, monospace; color:#342416;">
+          <tr><td style="padding:0;">
+            <div style="padding:10px 18px; border-bottom:1px solid #c9ad7a; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:700;">${company}</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="108" valign="top" style="padding:18px;">${imageCell(76, 4, '#b99b67')}</td>
+              <td valign="top" style="padding:18px 18px 18px 0;">
+                <div style="font-size:26px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-size:14px; color:#6f5939; padding-top:5px;">${title}</div>
+                <div style="border-top:1px solid #d7c49b; margin-top:12px; padding-top:10px; font-size:13px; line-height:1.8;">${contactLine({ ...c, text: '#342416', muted: '#9a8055' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'clinic-clean') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#f8feff; border:1px solid #c8eef4; border-radius:18px; font-family:Arial, sans-serif; color:#12323d;">
+          <tr><td style="padding:23px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="96">${imageCell(78, 39, '#b8e4eb')}</td>
+              <td style="padding-left:18px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:900;">${name}</div>
+                <div style="font-size:15px; color:#4d7180; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#12323d', muted: '#7aa2ad' })}</div>
+              </td>
+              <td width="48" align="right" valign="top"><div style="color:${accent}; font-size:30px; font-weight:900;">+</div></td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'education-seal') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#fffdf4; border:1px solid #e3d6a8; border-radius:14px; font-family:Arial, sans-serif; color:#1f2937;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td valign="top">
+                <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">${company}</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#667085; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#1f2937', muted: '#8a7f60' })}</div>
+              </td>
+              <td width="96" align="right" valign="top"><div style="width:72px; height:72px; border-radius:50%; border:3px double ${accent}; color:${accent}; line-height:72px; text-align:center; font-size:24px; font-weight:900;">${escapeHtml((state.company || 'E').slice(0,1))}</div></td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'legal-letterhead') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#ffffff; border:1px solid #cfd5df; font-family:Georgia, 'Times New Roman', serif; color:#111827;">
+          <tr><td style="height:8px; background:${accent};"></td></tr>
+          <tr><td style="padding:22px 24px;">
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#6b7280;">${company}</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>
+              <td width="86" valign="top">${imageCell(68, 4, '#cfd5df')}</td>
+              <td valign="top" style="padding-left:16px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-family:Arial, sans-serif; color:#4b5563; font-size:15px; padding-top:4px;">${title}</div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7; padding-top:11px;">${contactLine({ ...c, text: '#111827', muted: '#9ca3af' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'real-estate') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:650px; max-width:100%; background:#ffffff; border:1px solid #dbeafe; border-radius:18px; font-family:Arial, sans-serif; color:#0f172a;">
+          <tr>
+            <td valign="top" style="padding:22px;">
+              <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+              <div style="font-size:15px; color:#475569; padding-top:4px;">${title} · ${company}</div>
+              <div style="display:inline-block; background:${soft(accent, 0.12)}; color:${accent}; padding:7px 10px; border-radius:999px; margin-top:12px; font-size:12px; font-weight:900;">Available for your next move</div>
+              <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#0f172a', muted: '#94a3b8' })}</div>
+            </td>
+            <td width="150" valign="top" style="background:#eff6ff; padding:22px; border-radius:0 18px 18px 0;">${imageCell(92, 18, '#bfdbfe')}</td>
+          </tr>
+        </table>`;
+
+      if (tpl === 'nonprofit') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:630px; max-width:100%; background:#fff8f4; border:1px solid #f4c7aa; border-radius:22px; font-family:Arial, sans-serif; color:#30190f;">
+          <tr><td style="padding:24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="98">${imageCell(80, 40, '#f4c7aa')}</td>
+              <td style="padding-left:18px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:900;">${name}</div>
+                <div style="font-size:15px; color:#855740; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.55; color:#855740; padding-top:10px;">${tagline}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:11px;">${contactLine({ ...c, text: '#30190f', muted: '#b08470' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'chef-card') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#fffaf5; border:1px solid #f2d1b8; border-radius:18px; font-family:Arial, sans-serif; color:#29130f;">
+          <tr><td style="padding:20px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="100" valign="top">${imageCell(82, 18, '#f2d1b8')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-family:Georgia, 'Times New Roman', serif; font-size:31px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-size:15px; color:#7f5547; padding-top:4px;">${title} · ${company}</div>
+                <div style="height:1px; background:${accent}; margin:13px 0; width:150px;"></div>
+                <div style="font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#29130f', muted: '#aa7b68' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'creator-neon') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#101014; border:1px solid ${accent}; border-radius:20px; font-family:Arial, sans-serif; color:#ffffff;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="104">${imageCell(84, 22, accent)}</td>
+              <td style="padding-left:18px;">
+                <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">Creator card</div>
+                <div style="font-size:31px; line-height:1.04; font-weight:900; letter-spacing:-0.05em;">${name}</div>
+                <div style="font-size:15px; color:#b8b8c7; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:12px;">${contactLine({ ...c, text: '#ffffff', muted: '#6f6f80' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'therapist-calm') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#f8fbf8; border:1px solid #cbded2; border-radius:26px; font-family:Arial, sans-serif; color:#20352b;">
+          <tr><td style="padding:24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="96">${imageCell(78, 39, '#cbded2')}</td>
+              <td style="padding-left:18px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:800;">${name}</div>
+                <div style="font-size:15px; color:#607868; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; color:#607868; line-height:1.55; padding-top:10px;">${tagline}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:11px;">${contactLine({ ...c, text: '#20352b', muted: '#8ca390' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'finance-ledger') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#f9faf7; border:1px solid #cbd8c4; border-radius:10px; font-family:Arial, sans-serif; color:#132318;">
+          <tr><td style="padding:22px; background-image:linear-gradient(90deg, rgba(22,101,52,.10) 1px, transparent 1px); background-size:34px 100%;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="96">${imageCell(78, 8, '#cbd8c4')}</td>
+              <td style="padding-left:18px;">
+                <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">${company}</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:#60705d; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#132318', muted: '#89947f' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (tpl === 'trades-badge') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:630px; max-width:100%; background:#111827; border:1px solid #374151; border-radius:18px; font-family:Arial, sans-serif; color:#ffffff;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="102">${imageCell(82, 14, '#4b5563')}</td>
+              <td style="padding-left:18px;">
+                <div style="display:inline-block; background:${accent}; color:#111827; border-radius:6px; padding:5px 8px; font-size:11px; text-transform:uppercase; letter-spacing:1px; font-weight:900;">Licensed contact</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em; padding-top:9px;">${name}</div>
+                <div style="font-size:15px; color:#cbd5e1; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:12px;">${contactLine({ ...c, text: '#ffffff', muted: '#6b7280' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (meta.family) return familySignature(meta, c, { accent, name, title, company, tagline, location });
+
+      return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:${c.card}; border:1px solid ${c.line}; border-radius:20px; font-family:Arial, Helvetica, sans-serif; color:${c.text}; overflow:hidden;">
+          <tr><td style="padding:22px 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="105" valign="middle">${imageCell(82, 41, c.line)}</td>
+              <td valign="middle" style="padding-left:18px;">
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em; color:${c.text};">${name}</div>
+                <div style="font-size:16px; line-height:1.3; color:${c.muted}; padding-top:4px;">${title}</div>
+                ${tagline ? `<div style="font-size:13px; line-height:1.5; color:${c.muted}; padding-top:10px; max-width:390px;">${tagline}</div>` : ''}
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="background:${accent}; padding:14px 24px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
+          <tr><td style="padding:13px 24px; font-size:13px; line-height:1.7;">${contactLine(c)}${location ? `<div style="color:${c.muted}; padding-top:4px;">${location}</div>` : ''}</td></tr>
+        </table>`;
+    }
+
+    function familySignature(meta, c, d) {
+      const dark = meta.mode === 'locked-dark';
+      const accent = d.accent;
+      const category = escapeHtml(meta.category || 'Signature');
+      const name = d.name;
+      const title = d.title;
+      const company = d.company;
+      const tagline = d.tagline;
+      const location = d.location;
+      const lightText = dark ? '#ffffff' : '#111827';
+      const lightMuted = dark ? '#b9c0cc' : '#667085';
+      const bg = dark ? '#111827' : '#ffffff';
+      const line = dark ? '#334155' : '#dbe1ea';
+      const contact = contactLine({ ...c, text: lightText, muted: dark ? '#64748b' : '#9aa3b2' });
+
+      if (meta.family === 'minimal') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:610px; max-width:100%; background:${bg}; border:1px solid ${line}; font-family:Arial, sans-serif; color:${lightText};">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="86" valign="top">${imageCell(68, meta.id.includes('frame') ? 0 : 10, line)}</td>
+              <td valign="top" style="padding-left:16px;">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:2px; color:${accent}; font-weight:900;">${category}</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${title}${company ? ` · ${company}` : ''}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contact}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (meta.family === 'pill') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:630px; max-width:100%; background:${bg}; border:1px solid ${line}; border-radius:28px; font-family:Arial, sans-serif; color:${lightText};">
+          <tr><td style="padding:24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="98" valign="top">${imageCell(78, 39, line)}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${title}</div>
+                <div style="display:inline-block; background:${soft(accent, dark ? 0.24 : 0.14)}; color:${dark ? '#ffffff' : accent}; border-radius:999px; padding:7px 11px; margin-top:11px; font-size:12px; font-weight:900;">${company || category}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:11px;">${contact}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (meta.family === 'split') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:${bg}; border:1px solid ${line}; border-radius:18px; font-family:Arial, sans-serif; color:${lightText}; overflow:hidden;">
+          <tr>
+            <td width="150" valign="top" style="background:${accent}; padding:22px;">${imageCell(92, 18, 'rgba(255,255,255,.55)')}</td>
+            <td valign="top" style="padding:23px;">
+              <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">${category}</div>
+              <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+              <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${title} · ${company}</div>
+              <div style="font-size:13px; line-height:1.7; padding-top:14px;">${contact}</div>
+            </td>
+          </tr>
+        </table>`;
+
+      if (meta.family === 'band') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:630px; max-width:100%; background:${bg}; border:1px solid ${line}; border-radius:18px; font-family:Arial, sans-serif; color:${lightText}; overflow:hidden;">
+          <tr><td style="padding:22px 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="100" valign="top">${imageCell(80, dark ? 18 : 40, line)}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7; padding-top:12px;">${contact}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="background:${accent}; padding:13px 24px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
+        </table>`;
+
+      if (meta.family === 'grid') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:650px; max-width:100%; background:${dark ? '#0f172a' : '#f8fbff'}; border:1px solid ${dark ? '#334155' : '#cfe0ff'}; border-radius:16px; font-family:Arial, sans-serif; color:${lightText};">
+          <tr><td style="padding:22px; background-image:linear-gradient(90deg, ${soft(accent, 0.14)} 1px, transparent 1px),linear-gradient(${soft(accent, 0.14)} 1px, transparent 1px); background-size:18px 18px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="108" valign="top">${imageCell(86, 12, dark ? '#475569' : '#9db9ef')}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:12px; text-transform:uppercase; letter-spacing:2px; color:${accent}; font-weight:900;">${company || category}</div>
+                <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
+                <div style="font-size:15px; color:${lightMuted}; padding:5px 0 12px;">${title}</div>
+                <div style="font-size:13px; line-height:1.7;">${contact}</div>
+                ${location ? `<div style="font-size:12px; color:${lightMuted}; padding-top:8px;">${location}</div>` : ''}
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (meta.family === 'darkline') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#101014; border:1px solid ${accent}; border-radius:18px; font-family:Arial, sans-serif; color:#ffffff;">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td width="104" valign="top">${imageCell(82, 18, accent)}</td>
+              <td valign="top" style="padding-left:18px;">
+                <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">${category}</div>
+                <div style="font-size:31px; line-height:1.04; font-weight:900; letter-spacing:-0.05em;">${name}</div>
+                <div style="font-size:15px; color:#b8b8c7; padding-top:4px;">${title}</div>
+                <div style="height:2px; background:${accent}; width:150px; margin:13px 0;"></div>
+                <div style="font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#ffffff', muted: '#6f6f80' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (meta.family === 'seal') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:${dark ? '#241431' : '#fffdf4'}; border:1px solid ${dark ? '#7c6a41' : '#e3d6a8'}; border-radius:16px; font-family:Georgia, 'Times New Roman', serif; color:${dark ? '#fff8db' : '#1f2937'};">
+          <tr><td style="padding:22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td valign="top">
+                <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:700;">${company || category}</div>
+                <div style="font-size:31px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-family:Arial, sans-serif; font-size:15px; color:${dark ? '#c9bdd8' : '#667085'}; padding-top:4px;">${title}</div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: dark ? '#fff8db' : '#1f2937', muted: dark ? '#9f8ab4' : '#8a7f60' })}</div>
+              </td>
+              <td width="92" align="right" valign="top"><div style="width:66px; height:66px; border-radius:50%; border:3px double ${accent}; color:${accent}; line-height:66px; text-align:center; font-size:24px; font-weight:900;">${escapeHtml((state.company || 'S').slice(0,1))}</div></td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      if (meta.family === 'letterhead') return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:#ffffff; border:1px solid #cfd5df; font-family:Georgia, 'Times New Roman', serif; color:#111827;">
+          <tr><td style="height:8px; background:${accent};"></td></tr>
+          <tr><td style="padding:22px 24px;">
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#6b7280;">${company || category}</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>
+              <td width="86" valign="top">${imageCell(68, 4, '#cfd5df')}</td>
+              <td valign="top" style="padding-left:16px;">
+                <div style="font-size:29px; line-height:1.05; font-weight:700;">${name}</div>
+                <div style="font-family:Arial, sans-serif; color:#4b5563; font-size:15px; padding-top:4px;">${title}</div>
+                <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7; padding-top:11px;">${contactLine({ ...c, text: '#111827', muted: '#9ca3af' })}</div>
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>`;
+
+      return `
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:${bg}; border:1px solid ${line}; border-radius:20px; font-family:Arial, sans-serif; color:${lightText};">
+          <tr><td style="padding:22px;">${name}</td></tr>
+        </table>`;
+    }
+
+    function renderTemplates() {
+      const list = $('#template-list');
+      const matches = templates.filter((tpl) => {
+        const haystack = `${tpl.name} ${tpl.category || ''} ${tpl.note || ''}`.toLowerCase();
+        return (categoryFilter === 'all' || tpl.category === categoryFilter) &&
+          (!designSearch || haystack.includes(designSearch.toLowerCase()));
+      });
+      list.innerHTML = matches.map((tpl) => {
+        return `<button type="button" class="template-card ${tpl.id === state.template ? 'active' : ''}" data-template="${tpl.id}">
+          <div class="mini-preview">${swatchHtml(tpl)}</div>
+          <div class="template-name">${escapeHtml(tpl.name)}</div>
+          <div class="template-note">${escapeHtml(tpl.category || 'Signature')} · ${escapeHtml(tpl.note)}</div>
+        </button>`;
+      }).join('') || `<div class="hint">No designs match that filter.</div>`;
+    }
+
+    function swatchHtml(tpl) {
+      const band = ['slate-band', 'ember', 'corner-office'].includes(tpl.id) ? '<div class="swatch-band"></div>' : '';
+      return `<div class="swatch ${tpl.id}" style="--swatch-accent:${tpl.accent}">
+        <div class="swatch-photo"></div>
+        <div class="swatch-line one"></div>
+        <div class="swatch-line two"></div>
+        <div class="swatch-line three"></div>
+        ${band}
+      </div>`;
+    }
+
+    function renderForm() {
+      Object.keys(defaultState).forEach((key) => {
+        const input = document.querySelector(`[name="${key}"]`);
+        if (input) input.value = state[key] || '';
+      });
+    }
+
+    function renderCategories() {
+      const select = $('#category-filter');
+      const categories = Array.from(new Set(templates.map(t => t.category || 'Other'))).sort();
+      select.innerHTML = `<option value="all">All categories</option>` +
+        categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
+      select.value = categoryFilter;
+    }
+
+    function render() {
+      $('#signature-preview').innerHTML = signatureHtml();
+      $('#mode-note').textContent = state.colorMode === 'auto' ? 'Allows email client color behavior' : 'Locked colors for email clients';
+      renderCategories();
+      renderTemplates();
+      renderForm();
+      saveState();
+    }
+
+    async function copyRich() {
+      const html = signatureHtml();
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          const item = new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([`${state.name}\n${state.title}\n${state.company}\n${state.email} ${state.phone} ${state.website}`], { type: 'text/plain' })
+          });
+          await navigator.clipboard.write([item]);
+        } else {
+          const holder = document.createElement('div');
+          holder.innerHTML = html;
+          document.body.appendChild(holder);
+          const range = document.createRange();
+          range.selectNodeContents(holder);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand('copy');
+          holder.remove();
+        }
+        toast('Copied signature for pasting');
+      } catch {
+        await navigator.clipboard.writeText(html);
+        toast('Copied HTML instead');
+      }
+    }
+
+    async function copyHtml() {
+      await navigator.clipboard.writeText(signatureHtml());
+      toast('Copied HTML');
+    }
+
+    function toast(message) {
+      const node = $('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => node.classList.remove('show'), 1800);
+    }
+
+    function downloadBackup() {
+      const data = JSON.stringify(state, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `SignaCard Backup - ${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    document.addEventListener('input', (event) => {
+      if (!event.target.name) return;
+      state[event.target.name] = event.target.value;
+      saveState();
+      $('#signature-preview').innerHTML = signatureHtml();
+      $('#mode-note').textContent = state.colorMode === 'auto' ? 'Allows email client color behavior' : 'Locked colors for email clients';
+    });
+
+    document.addEventListener('change', (event) => {
+      if (event.target.id === 'json-file' && event.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            state = { ...defaultState, ...JSON.parse(reader.result) };
+            render();
+            toast('Imported backup');
+          } catch {
+            toast('Could not import file');
+          }
+        };
+        reader.readAsText(event.target.files[0]);
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const templateButton = event.target.closest('[data-template]');
+      if (templateButton) {
+        const tpl = templates.find(t => t.id === templateButton.dataset.template);
+        state.template = tpl.id;
+        state.accent = tpl.accent;
+        state.colorMode = tpl.mode;
+        render();
+        document.body.classList.remove('show-templates');
+      }
+    });
+
+    $('#copy-rich').addEventListener('click', copyRich);
+    $('#copy-html').addEventListener('click', copyHtml);
+    $('#export-json').addEventListener('click', downloadBackup);
+    $('#import-json').addEventListener('click', () => $('#json-file').click());
+    $('#design-search').addEventListener('input', (event) => {
+      designSearch = event.target.value;
+      renderTemplates();
+    });
+    $('#category-filter').addEventListener('change', (event) => {
+      categoryFilter = event.target.value;
+      renderTemplates();
+    });
+    $('#tab-templates').addEventListener('click', () => setMobilePanel('templates'));
+    $('#tab-preview').addEventListener('click', () => setMobilePanel('preview'));
+    $('#tab-details').addEventListener('click', () => setMobilePanel('details'));
+
+    function setMobilePanel(panel) {
+      document.body.classList.toggle('show-templates', panel === 'templates');
+      document.body.classList.toggle('show-details', panel === 'details');
+      $('#tab-templates').classList.toggle('active', panel === 'templates');
+      $('#tab-preview').classList.toggle('active', panel === 'preview');
+      $('#tab-details').classList.toggle('active', panel === 'details');
+    }
+
+    render();
+  </script>
+</body>
+</html>
