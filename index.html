@@ -132,6 +132,11 @@
       flex-wrap: wrap;
       justify-content: flex-end;
     }
+    .mobile-panel-actions {
+      display: none;
+      gap: 8px;
+      width: 100%;
+    }
     .btn {
       min-height: 42px;
       padding: 0 14px;
@@ -160,6 +165,25 @@
       font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .section-title-row .section-title {
+      margin: 0;
+    }
+    .count-pill {
+      background: var(--soft);
+      border-radius: 999px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 10px;
+      white-space: nowrap;
     }
     .template-list {
       display: grid;
@@ -558,13 +582,13 @@
       body { overflow: hidden; }
       .app {
         grid-template-columns: 1fr;
-        grid-template-rows: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto minmax(0, 1fr);
       }
       .sidebar,
       .inspector {
         display: none;
         position: fixed;
-        inset: 76px 0 58px;
+        inset: 128px 0 0;
         z-index: 10;
         border: 0;
       }
@@ -576,19 +600,37 @@
         grid-row: 2;
       }
       .topbar {
-        min-height: 76px;
+        min-height: 0;
         grid-row: 1;
-        padding: 12px;
+        gap: 8px;
+        padding: 10px 12px;
+        flex-wrap: wrap;
       }
       .brand-title {
-        font-size: 21px;
+        font-size: 20px;
       }
       .brand-subtitle {
-        font-size: 10px;
+        display: none;
       }
       .brand-mark {
-        width: 42px;
-        height: 42px;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+      }
+      .top-actions {
+        gap: 6px;
+      }
+      .top-actions .btn,
+      .mobile-panel-actions .btn {
+        min-height: 38px;
+        padding: 0 12px;
+      }
+      .mobile-panel-actions {
+        display: flex;
+        order: 3;
+      }
+      .mobile-panel-actions .btn {
+        flex: 1;
       }
       .stage {
         padding: 18px;
@@ -603,7 +645,7 @@
         display: none;
       }
       .mobile-tabs {
-        display: flex;
+        display: none;
         grid-row: 3;
       }
       .inspector,
@@ -625,6 +667,12 @@
       .top-actions .btn.primary {
         min-width: 86px;
       }
+      .top-actions {
+        margin-left: auto;
+      }
+      #copy-html {
+        padding-inline: 10px;
+      }
       .preview-card {
         justify-content: flex-start;
       }
@@ -641,7 +689,10 @@
 <body>
   <div class="app">
     <aside class="sidebar" id="templates-panel">
-      <h2 class="section-title">Card Designs</h2>
+      <div class="section-title-row">
+        <h2 class="section-title">Card Designs</h2>
+        <span class="count-pill">100 designs</span>
+      </div>
       <div class="design-tools">
         <input id="design-search" type="search" placeholder="Search 100 designs">
         <select id="category-filter" aria-label="Filter designs by category">
@@ -663,8 +714,12 @@
         <div class="top-actions">
           <button class="btn" type="button" id="export-json">Backup</button>
           <button class="btn" type="button" id="import-json">Import</button>
-          <button class="btn" type="button" id="copy-html">Copy HTML</button>
+          <button class="btn" type="button" id="copy-html" title="Copy HTML">HTML</button>
           <button class="btn primary" type="button" id="copy-rich">Copy</button>
+        </div>
+        <div class="mobile-panel-actions" aria-label="Mobile editing panels">
+          <button class="btn" type="button" id="mobile-open-designs">Designs <span aria-hidden="true">100</span></button>
+          <button class="btn" type="button" id="mobile-open-details">Details</button>
         </div>
       </header>
       <section class="stage">
@@ -1674,6 +1729,12 @@
     $('#tab-templates').addEventListener('click', () => setMobilePanel('templates'));
     $('#tab-preview').addEventListener('click', () => setMobilePanel('preview'));
     $('#tab-details').addEventListener('click', () => setMobilePanel('details'));
+    $('#mobile-open-designs').addEventListener('click', () => {
+      setMobilePanel(document.body.classList.contains('show-templates') ? 'preview' : 'templates');
+    });
+    $('#mobile-open-details').addEventListener('click', () => {
+      setMobilePanel(document.body.classList.contains('show-details') ? 'preview' : 'details');
+    });
 
     function setMobilePanel(panel) {
       document.body.classList.toggle('show-templates', panel === 'templates');
@@ -1681,6 +1742,8 @@
       $('#tab-templates').classList.toggle('active', panel === 'templates');
       $('#tab-preview').classList.toggle('active', panel === 'preview');
       $('#tab-details').classList.toggle('active', panel === 'details');
+      $('#mobile-open-designs').classList.toggle('primary', panel === 'templates');
+      $('#mobile-open-details').classList.toggle('primary', panel === 'details');
     }
 
     render();
