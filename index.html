@@ -61,11 +61,22 @@
     .drop-zone {
       transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     }
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    .drop-zone:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--coffee) 76%, transparent);
+      outline-offset: 3px;
+    }
     button:hover,
     .template-card:hover,
     .avatar-option:hover,
     .saved-card:hover {
       transform: translateY(-1px);
+    }
+    button:active {
+      transform: translateY(0) scale(0.99);
     }
     .app {
       display: grid;
@@ -246,6 +257,7 @@
       border-radius: 14px;
       display: grid;
       gap: 10px;
+      animation: cardIn 0.28s ease both;
     }
     .template-card.active {
       border-color: var(--accent);
@@ -298,6 +310,18 @@
       font-size: 11px;
       font-weight: 900;
       padding: 0 9px;
+    }
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      background: var(--panel-strong);
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 750;
     }
     .mini-preview {
       height: 96px;
@@ -596,6 +620,7 @@
       width: 100%;
       max-width: 100%;
       background: transparent;
+      animation: previewIn 0.24s ease both;
     }
     .subsection {
       border-top: 1px solid var(--line);
@@ -657,6 +682,7 @@
       min-height: 28px;
     }
     .preset-grid,
+    .action-grid,
     .avatar-grid,
     .saved-list {
       display: grid;
@@ -664,6 +690,9 @@
     }
     .preset-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .action-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .preset {
       min-height: 48px;
@@ -724,6 +753,13 @@
       border-color: var(--accent);
       background: color-mix(in srgb, var(--accent) 8%, var(--panel-strong));
     }
+    .html-output {
+      min-height: 118px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      resize: vertical;
+    }
     .saved-card {
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -735,6 +771,11 @@
     .saved-card-title {
       font-weight: 900;
       font-size: 13px;
+    }
+    .saved-card-meta {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
     }
     .saved-card-actions {
       display: flex;
@@ -789,6 +830,9 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+    .inspector .two {
+      grid-template-columns: 1fr;
+    }
     .hint {
       color: var(--muted);
       font-size: 12px;
@@ -835,6 +879,24 @@
     }
     .hidden-file {
       display: none;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes previewIn {
+      from { opacity: 0; transform: translateY(6px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     @media (max-width: 980px) {
@@ -963,7 +1025,7 @@
         max-width: 100%;
         overflow: hidden;
       }
-      .mode-note {
+      #mode-note {
         display: none;
       }
       .mobile-panel-actions {
@@ -987,6 +1049,9 @@
       .two {
         grid-template-columns: 1fr;
       }
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -999,7 +1064,7 @@
       </div>
       <p class="section-subtitle">Pick a card style, then tune the details without losing email-safe HTML.</p>
       <div class="design-tools">
-        <input id="design-search" type="search" placeholder="Search designs">
+        <input id="design-search" type="search" placeholder="Search designs" aria-label="Search designs">
         <select id="category-filter" aria-label="Filter designs by category">
           <option value="all">All categories</option>
         </select>
@@ -1209,6 +1274,22 @@
           </div>
         </details>
         </section>
+        <section class="control-section">
+          <div class="control-heading"><h3>Output</h3><span>Copy, download, backup</span></div>
+          <div class="action-grid">
+            <button class="btn primary" type="button" id="panel-copy-rich">Copy Signature</button>
+            <button class="btn" type="button" id="panel-copy-html">Copy HTML</button>
+            <button class="btn" type="button" id="panel-download-html">Download HTML</button>
+            <button class="btn" type="button" id="panel-export-json">Backup App</button>
+            <button class="btn" type="button" id="panel-import-json">Import Backup</button>
+            <button class="btn" type="button" id="panel-save-card">Save Card</button>
+          </div>
+          <div class="field">
+            <label for="html-output">Generated HTML</label>
+            <textarea class="html-output" id="html-output" readonly spellcheck="false"></textarea>
+          </div>
+          <p class="hint">Hosted images work in email. Dragged-in local images are only stored in this browser so you can test the look before hosting the image.</p>
+        </section>
         <div class="subsection">
           <div class="section-title-row">
             <h3 class="section-title">Saved Cards</h3>
@@ -1226,7 +1307,7 @@
       <button type="button" id="tab-details">Details</button>
     </nav>
   </div>
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
     const STORAGE_KEY = 'signacard.v2';
@@ -1488,12 +1569,7 @@
     function loadState() {
       try {
         const loaded = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        const merged = { ...defaultState, ...loaded, stateVersion: STATE_VERSION };
-        if (!designPresets[merged.preset]) merged.preset = defaultState.preset;
-        if (!['desktop', 'compact', 'mobile'].includes(merged.previewSize)) merged.previewSize = defaultState.previewSize;
-        merged.cardWidth = Math.max(320, Math.min(760, Number(merged.cardWidth) || defaultState.cardWidth));
-        merged.fontScale = Math.max(75, Math.min(128, Number(merged.fontScale) || defaultState.fontScale));
-        merged.paddingScale = Math.max(55, Math.min(140, Number(merged.paddingScale) || defaultState.paddingScale));
+        const merged = sanitizeState(loaded);
         if (loaded.stateVersion !== STATE_VERSION) {
           const tpl = templates.find(t => t.id === merged.template) || templates[0];
           Object.assign(merged, templateDesignDefaults(tpl));
@@ -1502,6 +1578,22 @@
       } catch {
         return { ...defaultState };
       }
+    }
+
+    function sanitizeState(value) {
+      const merged = { ...defaultState, ...(value || {}), stateVersion: STATE_VERSION };
+      if (!templates.some(t => t.id === merged.template)) merged.template = defaultState.template;
+      if (!designPresets[merged.preset]) merged.preset = defaultState.preset;
+      if (!['desktop', 'compact', 'mobile'].includes(merged.previewSize)) merged.previewSize = defaultState.previewSize;
+      if (!['locked-light', 'locked-dark', 'auto'].includes(merged.colorMode)) merged.colorMode = defaultState.colorMode;
+      if (!['template', 'circle', 'soft', 'square'].includes(merged.photoStyle)) merged.photoStyle = defaultState.photoStyle;
+      if (!['solid', 'dashed', 'double'].includes(merged.borderStyle)) merged.borderStyle = defaultState.borderStyle;
+      merged.cardWidth = Math.max(320, Math.min(760, Number(merged.cardWidth) || defaultState.cardWidth));
+      merged.fontScale = Math.max(75, Math.min(128, Number(merged.fontScale) || defaultState.fontScale));
+      merged.paddingScale = Math.max(55, Math.min(140, Number(merged.paddingScale) || defaultState.paddingScale));
+      merged.radius = Math.max(0, Math.min(36, Number(merged.radius) || defaultState.radius));
+      merged.borderWidth = Math.max(0, Math.min(6, Number(merged.borderWidth) || defaultState.borderWidth));
+      return merged;
     }
 
     function saveState() {
@@ -2170,6 +2262,14 @@
       const mobileCount = $('#mobile-design-count');
       mobileCount.textContent = filtered ? matches.length : '';
       mobileCount.hidden = !filtered;
+      if (!visible.length) {
+        list.innerHTML = `<div class="empty-state">
+          <strong>All included designs are hidden.</strong>
+          <span>Restore them when you want the full library back.</span>
+          <button class="btn" type="button" data-restore-designs>Restore included designs</button>
+        </div>`;
+        return;
+      }
       list.innerHTML = matches.map((tpl) => {
         const modeLabel = tpl.mode === 'locked-dark' ? 'Dark' : tpl.mode === 'auto' ? 'Auto' : 'Light';
         return `<button type="button" class="template-card ${tpl.id === state.template ? 'active' : ''}" data-template="${tpl.id}">
@@ -2184,7 +2284,10 @@
           <div class="template-note">${escapeHtml(tpl.note)}</div>
           <div class="template-card-actions"><span class="mini-action" data-hide-template="${tpl.id}">Hide</span></div>
         </button>`;
-      }).join('') || `<div class="hint">No designs match that filter.</div>`;
+      }).join('') || `<div class="empty-state">
+        <strong>No designs match that search.</strong>
+        <span>Clear the search or choose another category.</span>
+      </div>`;
     }
 
     function swatchHtml(tpl) {
@@ -2230,7 +2333,10 @@
     }
 
     function render() {
-      $('#signature-preview').innerHTML = signatureHtml();
+      const html = signatureHtml();
+      $('#signature-preview').innerHTML = html;
+      const output = $('#html-output');
+      if (output) output.value = html.trim();
       $('#mode-note').textContent = state.colorMode === 'auto' ? 'Auto colors' : 'Locked colors';
       renderPreviewMode();
       renderCategories();
@@ -2240,7 +2346,10 @@
     }
 
     function updatePreviewOnly() {
-      $('#signature-preview').innerHTML = signatureHtml();
+      const html = signatureHtml();
+      $('#signature-preview').innerHTML = html;
+      const output = $('#html-output');
+      if (output) output.value = html.trim();
       $('#mode-note').textContent = state.colorMode === 'auto' ? 'Auto colors' : 'Locked colors';
       renderPreviewMode();
       updateOutputs();
@@ -2273,7 +2382,7 @@
 
     function renderAvatars() {
       $('#avatar-grid').innerHTML = avatarPaths.map((src, index) => `
-        <button class="avatar-option ${state.photo === src ? 'active' : ''}" type="button" data-avatar="${src}" title="Avatar ${index + 1}">
+        <button class="avatar-option ${state.photo === src ? 'active' : ''}" type="button" data-avatar="${src}" title="${escapeHtml(avatarProfiles[index]?.name || `Avatar ${index + 1}`)}" aria-label="${escapeHtml(avatarProfiles[index]?.name || `Avatar ${index + 1}`)} avatar">
           <img src="${src}" alt="">
         </button>
       `).join('');
@@ -2292,6 +2401,7 @@
       $('#saved-list').innerHTML = savedCards.length ? savedCards.map((card) => `
         <div class="saved-card">
           <div class="saved-card-title">${escapeHtml(card.label)}</div>
+          <div class="saved-card-meta">${escapeHtml(card.savedAt ? new Date(card.savedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Saved card')}</div>
           <div class="saved-card-actions">
             <button class="btn" type="button" data-load-saved="${card.id}">Load</button>
             <button class="btn danger" type="button" data-delete-saved="${card.id}">Delete</button>
@@ -2323,14 +2433,38 @@
         }
         toast('Copied signature for pasting');
       } catch {
-        await navigator.clipboard.writeText(html);
-        toast('Copied HTML instead');
+        try {
+          await writeTextToClipboard(html);
+          toast('Copied HTML instead');
+        } catch {
+          toast('Could not copy signature');
+        }
       }
     }
 
+    async function writeTextToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const holder = document.createElement('textarea');
+      holder.value = text;
+      holder.setAttribute('readonly', '');
+      holder.style.position = 'fixed';
+      holder.style.left = '-9999px';
+      document.body.appendChild(holder);
+      holder.select();
+      document.execCommand('copy');
+      holder.remove();
+    }
+
     async function copyHtml() {
-      await navigator.clipboard.writeText(signatureHtml());
-      toast('Copied HTML');
+      try {
+        await writeTextToClipboard(signatureHtml());
+        toast('Copied HTML');
+      } catch {
+        toast('Could not copy HTML');
+      }
     }
 
     function toast(message) {
@@ -2342,13 +2476,21 @@
     }
 
     function downloadBackup() {
-      const data = JSON.stringify(state, null, 2);
+      const data = JSON.stringify({
+        app: 'SignaCard',
+        version: STATE_VERSION,
+        exportedAt: new Date().toISOString(),
+        state,
+        savedCards,
+        hiddenDesigns
+      }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `SignaCard Backup - ${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(link.href);
+      toast('Downloaded backup');
     }
 
     function downloadHtmlFile() {
@@ -2384,9 +2526,18 @@
       return items[Math.floor(Math.random() * items.length)];
     }
 
+    function visibleTemplates() {
+      return templates.filter(t => !hiddenDesigns.includes(t.id));
+    }
+
     function shuffleCard() {
       const profile = randomItem(avatarProfiles);
-      const tpl = randomItem(templates.filter(t => !hiddenDesigns.includes(t.id)));
+      const choices = visibleTemplates();
+      if (!choices.length) {
+        toast('Restore designs before shuffling');
+        return;
+      }
+      const tpl = randomItem(choices);
       const presetId = randomItem(Object.keys(designPresets));
       const preset = designPresets[presetId];
       state = {
@@ -2455,12 +2606,26 @@
         const reader = new FileReader();
         reader.onload = () => {
           try {
-            state = { ...defaultState, ...JSON.parse(reader.result) };
+            const imported = JSON.parse(reader.result);
+            if (imported && imported.app === 'SignaCard' && imported.state) {
+              state = sanitizeState(imported.state);
+              savedCards = Array.isArray(imported.savedCards)
+                ? imported.savedCards.slice(0, 24).map(card => ({ ...card, state: sanitizeState(card.state) }))
+                : savedCards;
+              hiddenDesigns = Array.isArray(imported.hiddenDesigns)
+                ? imported.hiddenDesigns.filter(id => templates.some(t => t.id === id))
+                : hiddenDesigns;
+              saveSavedCards();
+              saveHiddenDesigns();
+            } else {
+              state = sanitizeState(imported);
+            }
             render();
             toast('Imported backup');
           } catch {
             toast('Could not import file');
           }
+          event.target.value = '';
         };
         reader.readAsText(event.target.files[0]);
       }
@@ -2476,19 +2641,26 @@
         const id = hideButton.dataset.hideTemplate;
         hiddenDesigns = Array.from(new Set([...hiddenDesigns, id]));
         if (state.template === id) {
-          const next = templates.find(t => !hiddenDesigns.includes(t.id)) || templates[0];
-          state.template = next.id;
-          state.accent = next.accent;
-          state.colorMode = next.mode;
+          const next = visibleTemplates()[0];
+          if (next) {
+            state.template = next.id;
+            state.accent = next.accent;
+            state.colorMode = next.mode;
+          }
         }
         saveHiddenDesigns();
         render();
         toast('Design hidden');
         return;
       }
+      if (event.target.closest('[data-restore-designs]')) {
+        restoreDesigns();
+        return;
+      }
       const templateButton = event.target.closest('[data-template]');
       if (templateButton) {
         const tpl = templates.find(t => t.id === templateButton.dataset.template);
+        if (!tpl) return;
         state.template = tpl.id;
         state.accent = tpl.accent;
         state.colorMode = tpl.mode;
@@ -2514,7 +2686,7 @@
       if (loadSaved) {
         const card = savedCards.find(item => item.id === loadSaved.dataset.loadSaved);
         if (card) {
-          state = { ...defaultState, ...card.state };
+          state = sanitizeState(card.state);
           render();
           toast('Loaded saved card');
         }
@@ -2533,15 +2705,24 @@
     $('#export-json').addEventListener('click', downloadBackup);
     $('#import-json').addEventListener('click', () => $('#json-file').click());
     $('#download-html').addEventListener('click', downloadHtmlFile);
+    $('#panel-copy-rich').addEventListener('click', copyRich);
+    $('#panel-copy-html').addEventListener('click', copyHtml);
+    $('#panel-export-json').addEventListener('click', downloadBackup);
+    $('#panel-import-json').addEventListener('click', () => $('#json-file').click());
+    $('#panel-download-html').addEventListener('click', downloadHtmlFile);
+    $('#panel-save-card').addEventListener('click', saveCurrentCard);
     $('#shuffle-card').addEventListener('click', shuffleCard);
     $('#save-card').addEventListener('click', saveCurrentCard);
     $('#reset-card').addEventListener('click', resetCard);
-    $('#restore-designs').addEventListener('click', () => {
+
+    function restoreDesigns() {
       hiddenDesigns = [];
       saveHiddenDesigns();
       render();
       toast('Included designs restored');
-    });
+    }
+
+    $('#restore-designs').addEventListener('click', restoreDesigns);
     $('#drop-zone').addEventListener('click', () => $('#photo-upload').click());
     $('#drop-zone').addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') $('#photo-upload').click();
