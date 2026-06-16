@@ -629,6 +629,10 @@
       background: transparent;
       animation: previewIn 0.24s ease both;
     }
+    .signature-output > table {
+      margin-left: auto;
+      margin-right: auto;
+    }
     .subsection {
       border-top: 1px solid var(--line);
       padding-top: 16px;
@@ -1720,6 +1724,7 @@
       const width = Math.max(320, Math.min(760, Number(state.cardWidth) || 600));
       const fontScale = (Number(state.fontScale) || 100) / 100;
       const paddingScale = (Number(state.paddingScale) || 100) / 100;
+      const mediaScale = Math.max(0.58, Math.min(1.28, (fontScale + paddingScale) / 2));
       const radius = Math.max(0, Number(state.radius) || 0);
       const borderWidth = Math.max(0, Number(state.borderWidth) || 0);
       const borderStyle = ['solid', 'dashed', 'double'].includes(state.borderStyle) ? state.borderStyle : 'solid';
@@ -1727,6 +1732,7 @@
       const bg = state.cardBg || colors().card;
       const text = state.textColor || colors().text;
       const font = state.fontFamily || 'Arial, Helvetica, sans-serif';
+      const scaleMedia = (value, floor = 1) => Math.max(floor, Math.round(Number(value) * mediaScale));
       let output = html
         .replace(/width:\d+px; max-width:100%;/, `width:100%; max-width:${width}px; table-layout:fixed;`)
         .replace(/font-family:[^;]+;/, `font-family:${font};`)
@@ -1753,6 +1759,28 @@
       output = output.replace(/margin:([0-9]+)px 0/g, (_, size) => {
         const scaled = Math.max(4, Math.round(Number(size) * paddingScale));
         return `margin:${scaled}px 0`;
+      });
+      output = output.replace(/(<td\b[^>]*\swidth=")(\d+)(")/g, (match, before, size, after) => {
+        const numeric = Number(size);
+        if (numeric > 180) return match;
+        return `${before}${scaleMedia(numeric, 36)}${after}`;
+      });
+      output = output.replace(/(<img\b[^>]*\swidth=")(\d+)(" height=")(\d+)(")/g, (match, before, widthValue, middle, heightValue, after) => {
+        const widthNumber = Number(widthValue);
+        const heightNumber = Number(heightValue);
+        if (widthNumber > 220 || heightNumber > 220) return match;
+        return `${before}${scaleMedia(widthNumber, 40)}${middle}${scaleMedia(heightNumber, 40)}${after}`;
+      });
+      output = output.replace(/(width:)(\d+)(px;\s*height:)(\d+)(px;)/g, (match, beforeWidth, widthValue, middle, heightValue, afterHeight) => {
+        const widthNumber = Number(widthValue);
+        const heightNumber = Number(heightValue);
+        if (widthNumber > 220 || heightNumber > 220) return match;
+        return `${beforeWidth}${scaleMedia(widthNumber, 40)}${middle}${scaleMedia(heightNumber, 40)}${afterHeight}`;
+      });
+      output = output.replace(/(line-height:)(\d+)(px;)/g, (match, before, size, after) => {
+        const numeric = Number(size);
+        if (numeric > 220) return match;
+        return `${before}${scaleMedia(numeric, 40)}${after}`;
       });
       return output;
     }
