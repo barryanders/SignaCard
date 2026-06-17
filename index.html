@@ -362,49 +362,18 @@
     }
     .template-card {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       text-align: left;
       background: var(--panel-strong);
       border: 1px solid var(--line);
       border-radius: 14px;
       display: grid;
-      gap: 10px;
+      gap: 0;
       animation: cardIn 0.28s ease both;
     }
     .template-card.active {
       border-color: var(--accent);
       box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
-    }
-    .template-card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .template-name {
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: -0.02em;
-    }
-    .template-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .template-chip {
-      border-radius: 999px;
-      background: var(--soft);
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 750;
-      padding: 4px 7px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .template-note {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
     }
     .template-card {
       position: relative;
@@ -415,6 +384,9 @@
       gap: 8px;
       opacity: 0;
       transition: opacity 0.16s ease;
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
     }
     .template-card:hover .template-card-actions,
     .template-card:focus-within .template-card-actions,
@@ -1244,7 +1216,6 @@
         <h2 class="section-title">Designs</h2>
         <span class="count-pill" id="design-count">Included</span>
       </div>
-      <p class="section-subtitle">Pick a card style, then tune the details without losing email-safe HTML.</p>
       <div class="design-tools">
         <input id="design-search" type="search" placeholder="Search designs" aria-label="Search designs">
         <div class="look-filter" id="style-filter" aria-label="Filter designs by look"></div>
@@ -2700,18 +2671,8 @@
         return;
       }
       list.innerHTML = matches.map((tpl) => {
-        const modeLabel = tpl.mode === 'locked-dark' ? 'Dark' : tpl.mode === 'auto' ? 'Auto' : 'Light';
-        const visualLabel = templateVisualLabels(tpl)[0] || 'Signature';
-        return `<button type="button" class="template-card ${tpl.id === state.template ? 'active' : ''}" data-template="${tpl.id}">
+        return `<button type="button" class="template-card ${tpl.id === state.template ? 'active' : ''}" data-template="${tpl.id}" aria-label="${escapeHtml(tpl.name)}" title="${escapeHtml(tpl.name)}">
           <div class="mini-preview">${swatchHtml(tpl)}</div>
-          <div class="template-card-top">
-            <div class="template-name">${escapeHtml(tpl.name)}</div>
-            <div class="template-meta">
-              <span class="template-chip">${escapeHtml(visualLabel)}</span>
-              <span class="template-chip">${modeLabel}</span>
-            </div>
-          </div>
-          <div class="template-note">${escapeHtml(tpl.note)}</div>
           <div class="template-card-actions"><span class="mini-action" data-hide-template="${tpl.id}">Hide</span></div>
         </button>`;
       }).join('') || `<div class="empty-state">
