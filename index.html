@@ -245,6 +245,42 @@
       outline: none;
       font-weight: 600;
     }
+    .filter-details {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-strong);
+      overflow: hidden;
+    }
+    .filter-details summary {
+      min-height: 38px;
+      padding: 0 11px;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 750;
+      list-style: none;
+    }
+    .filter-details summary::-webkit-details-marker {
+      display: none;
+    }
+    .filter-details summary::after {
+      content: "+";
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1;
+    }
+    .filter-details[open] summary::after {
+      content: "-";
+    }
+    .filter-details select {
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: var(--panel);
+    }
     .look-filter {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1156,10 +1192,13 @@
       <p class="section-subtitle">Pick a card style, then tune the details without losing email-safe HTML.</p>
       <div class="design-tools">
         <input id="design-search" type="search" placeholder="Search designs" aria-label="Search designs">
-        <select id="category-filter" aria-label="Filter designs by category">
-          <option value="all">All categories</option>
-        </select>
         <div class="look-filter" id="style-filter" aria-label="Filter designs by look"></div>
+        <details class="filter-details">
+          <summary>Industry</summary>
+          <select id="category-filter" aria-label="Filter designs by category">
+            <option value="all">All categories</option>
+          </select>
+        </details>
       </div>
       <div class="template-list" id="template-list"></div>
       <div class="sidebar-section">
@@ -1185,6 +1224,7 @@
         </div>
         <div class="top-actions">
           <button class="btn coffee" type="button" id="shuffle-card">Shuffle</button>
+          <button class="btn" type="button" id="top-save-card">Save</button>
           <button class="btn primary" type="button" id="copy-rich">Copy</button>
           <button class="btn" type="button" id="download-html">Download</button>
         </div>
@@ -1741,17 +1781,22 @@
 
     function sanitizeState(value) {
       const merged = { ...defaultState, ...(value || {}), stateVersion: STATE_VERSION };
+      const clampNumber = (candidate, fallback, min, max) => {
+        const number = Number(candidate);
+        if (!Number.isFinite(number)) return fallback;
+        return Math.max(min, Math.min(max, number));
+      };
       if (!templates.some(t => t.id === merged.template)) merged.template = defaultState.template;
       if (!designPresets[merged.preset]) merged.preset = defaultState.preset;
       if (!['desktop', 'compact', 'mobile'].includes(merged.previewSize)) merged.previewSize = defaultState.previewSize;
       if (!['locked-light', 'locked-dark', 'auto'].includes(merged.colorMode)) merged.colorMode = defaultState.colorMode;
       if (!['template', 'circle', 'soft', 'square'].includes(merged.photoStyle)) merged.photoStyle = defaultState.photoStyle;
       if (!['solid', 'dashed', 'double'].includes(merged.borderStyle)) merged.borderStyle = defaultState.borderStyle;
-      merged.cardWidth = Math.max(320, Math.min(760, Number(merged.cardWidth) || defaultState.cardWidth));
-      merged.fontScale = Math.max(75, Math.min(128, Number(merged.fontScale) || defaultState.fontScale));
-      merged.paddingScale = Math.max(55, Math.min(140, Number(merged.paddingScale) || defaultState.paddingScale));
-      merged.radius = Math.max(0, Math.min(36, Number(merged.radius) || defaultState.radius));
-      merged.borderWidth = Math.max(0, Math.min(6, Number(merged.borderWidth) || defaultState.borderWidth));
+      merged.cardWidth = clampNumber(merged.cardWidth, defaultState.cardWidth, 320, 760);
+      merged.fontScale = clampNumber(merged.fontScale, defaultState.fontScale, 75, 128);
+      merged.paddingScale = clampNumber(merged.paddingScale, defaultState.paddingScale, 55, 140);
+      merged.radius = clampNumber(merged.radius, defaultState.radius, 0, 36);
+      merged.borderWidth = clampNumber(merged.borderWidth, defaultState.borderWidth, 0, 6);
       return merged;
     }
 
@@ -3029,6 +3074,7 @@
     $('#panel-export-json').addEventListener('click', downloadBackup);
     $('#panel-import-json').addEventListener('click', () => $('#json-file').click());
     $('#shuffle-card').addEventListener('click', shuffleCard);
+    $('#top-save-card').addEventListener('click', saveCurrentCard);
     $('#save-card').addEventListener('click', saveCurrentCard);
     $('#reset-card').addEventListener('click', resetCard);
 
