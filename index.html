@@ -969,10 +969,24 @@
       border-radius: 999px;
       background: var(--soft);
       font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
     }
     .mobile-tabs button.active {
       background: var(--accent);
       color: var(--panel);
+    }
+    .tab-icon {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      flex: 0 0 auto;
     }
     .toast {
       position: fixed;
@@ -1180,6 +1194,8 @@
         color: var(--muted);
         font-size: 12px;
         font-weight: 850;
+        flex-direction: column;
+        gap: 3px;
       }
       .mobile-tabs button.active {
         background: var(--soft);
@@ -1497,9 +1513,32 @@
     </aside>
 
     <nav class="mobile-tabs" aria-label="Mobile panels">
-      <button type="button" id="tab-templates">Designs</button>
-      <button type="button" id="tab-preview" class="active">Preview</button>
-      <button type="button" id="tab-details">Details</button>
+      <button type="button" id="tab-templates">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+        <span>Designs</span>
+      </button>
+      <button type="button" id="tab-preview" class="active">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="3"></rect>
+          <path d="M7 10h5"></path>
+          <path d="M7 14h10"></path>
+        </svg>
+        <span>Preview</span>
+      </button>
+      <button type="button" id="tab-details">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h10"></path>
+          <path d="M4 17h10"></path>
+          <circle cx="18" cy="7" r="2"></circle>
+          <circle cx="8" cy="17" r="2"></circle>
+        </svg>
+        <span>Details</span>
+      </button>
     </nav>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -3252,7 +3291,7 @@
           ...templateDesignDefaults(tpl)
         });
         render();
-        document.body.classList.remove('show-templates');
+        setMobilePanel('preview');
       }
       const avatarButton = event.target.closest('[data-avatar]');
       if (avatarButton) {
