@@ -245,6 +245,74 @@
       outline: none;
       font-weight: 600;
     }
+    .look-filter {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .look-button {
+      min-height: 54px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-strong);
+      color: var(--muted);
+      display: grid;
+      justify-items: start;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+    .look-button.active {
+      color: var(--text);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+    .look-swatch {
+      width: 100%;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+      background: #ffffff;
+      overflow: hidden;
+      position: relative;
+    }
+    .look-swatch.all {
+      background: linear-gradient(90deg, #ffffff 0 33%, #111214 33% 66%, #f4c763 66%);
+    }
+    .look-swatch.light { background: #ffffff; }
+    .look-swatch.dark { background: #111214; }
+    .look-swatch.color {
+      background: #ffffff;
+    }
+    .look-swatch.color::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 34%;
+      background: #f4c763;
+    }
+    .look-swatch.clean {
+      background:
+        linear-gradient(90deg, rgba(15, 23, 42, 0.14) 1px, transparent 1px),
+        linear-gradient(rgba(15, 23, 42, 0.14) 1px, transparent 1px),
+        #ffffff;
+      background-size: 8px 8px;
+    }
+    .look-swatch.classic {
+      background: #fff9ed;
+    }
+    .look-swatch.classic::after {
+      content: "";
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 2px double #9b6a3f;
+    }
     .template-card {
       width: 100%;
       padding: 12px;
@@ -1091,9 +1159,7 @@
         <select id="category-filter" aria-label="Filter designs by category">
           <option value="all">All categories</option>
         </select>
-        <select id="style-filter" aria-label="Filter designs by visual style">
-          <option value="all">All visual styles</option>
-        </select>
+        <div class="look-filter" id="style-filter" aria-label="Filter designs by look"></div>
       </div>
       <div class="template-list" id="template-list"></div>
       <div class="sidebar-section">
@@ -1516,11 +1582,72 @@
       'accountant-ledger',
       'attorney-classic',
       'realtor-premium',
-      'contractor-badge'
+      'contractor-badge',
+      'investor-memo',
+      'founder-note',
+      'account-strategist',
+      'customer-success',
+      'support-human',
+      'success-minimal',
+      'hr-welcome',
+      'people-ops',
+      'compliance-clean',
+      'dental-bright',
+      'clinic-admin',
+      'nurse-care',
+      'student-portfolio',
+      'alumni-network',
+      'librarian-modern',
+      'mortgage-advisor',
+      'property-manager',
+      'interior-studio',
+      'bookkeeper-clean',
+      'insurance-card',
+      'designer-studio',
+      'writer-byline',
+      'product-manager',
+      'data-science',
+      'architect-lines',
+      'church-staff',
+      'fundraiser',
+      'museum-curator',
+      'restaurant-owner',
+      'event-planner',
+      'plumbing-service',
+      'landscaping-green',
+      'wellness-guide',
+      'coach-modern',
+      'retro-terminal',
+      'royal-decree',
+      'desert-modern',
+      'olive-office',
+      'rose-consultant',
+      'friendly-round',
+      'civic-office'
     ]);
     for (let index = templates.length - 1; index >= 0; index -= 1) {
       if (duplicateTemplateIds.has(templates[index].id)) templates.splice(index, 1);
     }
+    const featuredTemplateOrder = [
+      'slate-band', 'ivory-letterpress', 'sunrise-tab', 'tech-chip', 'gallery', 'botanical',
+      'ember', 'blueprint', 'mono-lux', 'publisher', 'corner-office', 'soft-shadow',
+      'legal-letterhead', 'real-estate', 'clinic-clean', 'chef-card', 'creator-neon',
+      'finance-ledger', 'trades-badge', 'ceo-black-card', 'sales-velocity', 'demo-booking',
+      'recruiter-card', 'law-firm-gold', 'doctor-direct', 'professor-card', 'department-office',
+      'wealth-advisor', 'photographer-frame', 'video-producer', 'developer-terminal',
+      'security-ops', 'nonprofit', 'community-program', 'hotel-concierge', 'travel-advisor',
+      'electrician-card', 'fitness-coach', 'veterinary-care', 'film-noir', 'space-opera',
+      'wizard-academy', 'medieval-guild', 'pirate-map', 'cyberpunk-card', 'library-card',
+      'education-seal', 'boardroom-brass', 'help-desk', 'atlantic-blue',
+      'nordic-minimal', 'clean-grid'
+    ];
+    const featuredRank = new Map(featuredTemplateOrder.map((id, index) => [id, index]));
+    templates.sort((a, b) => {
+      const rankA = featuredRank.has(a.id) ? featuredRank.get(a.id) : 999;
+      const rankB = featuredRank.has(b.id) ? featuredRank.get(b.id) : 999;
+      if (rankA !== rankB) return rankA - rankB;
+      return `${a.category}${a.name}`.localeCompare(`${b.category}${b.name}`);
+    });
 
     const defaultState = {
       template: 'slate-band',
@@ -2427,25 +2554,20 @@
     }
 
     const visualFilterOptions = [
-      ['all', 'All visual styles'],
-      ['light', 'Light designs'],
-      ['dark', 'Dark designs'],
-      ['side-panel', 'Color side panel'],
-      ['bar', 'Top or bottom bar'],
-      ['photo-left', 'Photo on left'],
-      ['photo-right', 'Photo on right'],
-      ['minimal', 'Minimal'],
-      ['editorial', 'Editorial'],
-      ['grid', 'Grid / technical'],
-      ['soft', 'Soft rounded'],
-      ['seal', 'Seal / badge']
+      ['all', 'All'],
+      ['light', 'Light'],
+      ['dark', 'Dark'],
+      ['color', 'Color'],
+      ['clean', 'Clean'],
+      ['classic', 'Classic']
     ];
 
     function templateVisualTags(tpl) {
       const tags = new Set([tpl.mode === 'locked-dark' ? 'dark' : 'light']);
       const family = tpl.family || '';
-      if (family === 'split') tags.add('side-panel');
-      if (['band', 'letterhead', 'darkline'].includes(family)) tags.add('bar');
+      if (['split', 'band', 'darkline', 'pill', 'soft'].includes(family)) tags.add('color');
+      if (['minimal', 'grid', 'letterhead'].includes(family)) tags.add('clean');
+      if (['editorial', 'seal'].includes(family)) tags.add('classic');
       if (['split', 'band', 'darkline', 'editorial', 'letterhead', 'grid', 'soft', 'pill', 'minimal'].includes(family)) tags.add('photo-left');
       if (family === 'seal') tags.add('photo-right');
       if (family === 'minimal') tags.add('minimal');
@@ -2458,13 +2580,9 @@
 
     function templateVisualLabels(tpl) {
       const tags = templateVisualTags(tpl);
-      if (tags.includes('side-panel')) return ['Side panel'];
-      if (tags.includes('bar')) return ['Color bar'];
-      if (tags.includes('seal')) return ['Seal'];
-      if (tags.includes('grid')) return ['Grid'];
-      if (tags.includes('editorial')) return ['Editorial'];
-      if (tags.includes('soft')) return ['Soft'];
-      if (tags.includes('minimal')) return ['Minimal'];
+      if (tags.includes('color')) return ['Color'];
+      if (tags.includes('clean')) return ['Clean'];
+      if (tags.includes('classic')) return ['Classic'];
       return [tpl.category || 'Signature'];
     }
 
@@ -2518,11 +2636,13 @@
       select.innerHTML = `<option value="all">All categories</option>` +
         categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
       select.value = categoryFilter;
-      const styleSelect = $('#style-filter');
-      styleSelect.innerHTML = visualFilterOptions.map(([value, label]) =>
-        `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`
+      const styleFilterEl = $('#style-filter');
+      styleFilterEl.innerHTML = visualFilterOptions.map(([value, label]) =>
+        `<button class="look-button ${styleFilter === value ? 'active' : ''}" type="button" data-style-filter="${escapeHtml(value)}" aria-pressed="${styleFilter === value}">
+          <span class="look-swatch ${escapeHtml(value)}" aria-hidden="true"></span>
+          <span>${escapeHtml(label)}</span>
+        </button>`
       ).join('');
-      styleSelect.value = styleFilter;
     }
 
     function render() {
@@ -2935,9 +3055,12 @@
       categoryFilter = event.target.value;
       renderTemplates();
     });
-    $('#style-filter').addEventListener('change', (event) => {
-      styleFilter = event.target.value;
+    $('#style-filter').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-style-filter]');
+      if (!button) return;
+      styleFilter = button.dataset.styleFilter;
       renderTemplates();
+      renderCategories();
     });
     $('#tab-templates').addEventListener('click', () => setMobilePanel('templates'));
     $('#tab-preview').addEventListener('click', () => setMobilePanel('preview'));

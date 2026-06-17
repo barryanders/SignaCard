@@ -40,9 +40,9 @@ Because browser storage is local, download backup copies of important signatures
 
 ## Features
 
-- 95 premade email signature card designs
+- 54 curated email signature card designs
 - 18 searchable design categories
-- Search, category filtering, hide included designs, and restore included designs
+- Search, category filtering, visual look filtering, hide included designs, and restore included designs
 - Editable name, title, company, photo URL, logo/text, email, phone, website, location, and tagline
 - 48 built-in 3D avatar choices for quick previews, including people, animals, sports, cultures, medical roles, artists, adventurers, and niche professions
 - Drag-and-drop local image previews stored only in your browser
