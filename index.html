@@ -362,18 +362,17 @@
     }
     .template-card {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       text-align: left;
-      background: var(--panel-strong);
-      border: 1px solid var(--line);
-      border-radius: 14px;
+      background: transparent;
+      border: 0;
+      border-radius: 16px;
       display: grid;
       gap: 0;
       animation: cardIn 0.28s ease both;
     }
     .template-card.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent);
     }
     .template-card {
       position: relative;
@@ -418,21 +417,21 @@
       font-weight: 750;
     }
     .mini-preview {
-      height: 124px;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #ffffff;
-      border: 1px solid rgba(15, 23, 42, 0.1);
+      min-height: 92px;
+      border-radius: 0;
+      overflow: visible;
+      background: transparent;
+      border: 0;
       position: relative;
       transform: translateZ(0);
     }
     .mini-preview-inner {
       position: absolute;
       left: 50%;
-      top: 50%;
+      top: 0;
       width: 320px;
-      transform: translate(-50%, -50%) scale(var(--mini-scale, 1));
-      transform-origin: center;
+      transform: translateX(-50%) scale(var(--mini-scale, 1));
+      transform-origin: top center;
       pointer-events: none;
     }
     .swatch-photo {
@@ -2711,12 +2710,12 @@
           inner.style.setProperty('--mini-scale', '1');
           inner.style.width = '320px';
           const previewRect = preview.getBoundingClientRect();
-          const maxWidth = Math.max(1, previewRect.width - 18);
-          const maxHeight = Math.max(1, previewRect.height - 18);
-          const width = Math.max(1, table.offsetWidth || 320);
+          const maxWidth = Math.max(1, previewRect.width);
           const height = Math.max(1, table.offsetHeight || 1);
-          const scale = Math.min(1, maxWidth / width, maxHeight / height);
-          inner.style.setProperty('--mini-scale', String(Math.max(0.28, scale)));
+          const scale = Math.min(1, maxWidth / 320);
+          const fittedScale = Math.max(0.55, scale);
+          inner.style.setProperty('--mini-scale', String(fittedScale));
+          preview.style.height = `${Math.ceil(height * fittedScale)}px`;
         });
       });
     }
@@ -3354,6 +3353,7 @@
       $('#tab-details').classList.toggle('active', panel === 'details');
       $('#mobile-open-designs').classList.toggle('primary', panel === 'templates');
       $('#mobile-open-details').classList.toggle('primary', panel === 'details');
+      if (panel === 'templates') fitMiniPreviews();
     }
 
     render();
