@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SignaCard - Email Signature Card Builder</title>
-  <meta name="description" content="SignaCard is a free local email signature card builder for creating customizable HTML email signatures with business-card style templates.">
+  <title>Siggy - Email Signature Card Builder</title>
+  <meta name="description" content="Siggy is a free local email signature builder for creating customizable HTML email signatures with business-card style templates.">
   <meta name="robots" content="index,follow">
-  <link rel="icon" href="assets/icons/signacard-mascot.png">
+  <link rel="icon" href="assets/icons/siggy-red-panda.png">
   <style>
     :root {
       --bg: #f5f6f8;
@@ -885,6 +885,16 @@
       display: grid;
       gap: 8px;
     }
+    .saved-card-preview {
+      min-height: 78px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: transparent;
+      position: relative;
+    }
+    .saved-card-preview .mini-preview-inner {
+      width: 320px;
+    }
     .saved-card-title {
       font-weight: 750;
       font-size: 13px;
@@ -896,6 +906,7 @@
     }
     .saved-card-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
     }
     .saved-card-actions .btn {
@@ -1109,9 +1120,13 @@
     }
 
     @media (max-width: 560px) {
+      :root {
+        --mobile-topbar-height: 70px;
+        --mobile-tabs-height: 82px;
+      }
       body.show-templates .sidebar,
       body.show-details .inspector {
-        inset: 62px 0 66px;
+        inset: var(--mobile-topbar-height) 0 var(--mobile-tabs-height);
       }
       .topbar {
         align-items: center;
@@ -1127,6 +1142,7 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 8px;
+        min-height: var(--mobile-topbar-height);
       }
       .topbar > *,
       .top-actions,
@@ -1141,7 +1157,7 @@
         font-size: 19px;
       }
       .workspace {
-        padding-top: 59px;
+        padding-top: var(--mobile-topbar-height);
       }
       .top-actions {
         width: auto;
@@ -1181,21 +1197,22 @@
         bottom: 0;
         z-index: 15;
         display: flex;
-        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+        min-height: var(--mobile-tabs-height);
+        padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
         border-top: 1px solid var(--line);
         background: color-mix(in srgb, var(--panel) 94%, transparent);
         backdrop-filter: blur(16px);
         box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.12);
       }
       .mobile-tabs button {
-        min-height: 42px;
-        border-radius: 14px;
+        min-height: 50px;
+        border-radius: 16px;
         background: transparent;
         color: var(--muted);
         font-size: 12px;
         font-weight: 850;
         flex-direction: column;
-        gap: 3px;
+        gap: 4px;
       }
       .mobile-tabs button.active {
         background: var(--soft);
@@ -1205,7 +1222,7 @@
         display: none;
       }
       .stage {
-        padding: 22px 18px 84px;
+        padding: 20px 18px calc(var(--mobile-tabs-height) + 18px);
       }
       .preview-card {
         justify-content: flex-start;
@@ -1257,9 +1274,9 @@
     <main class="workspace">
       <header class="topbar">
         <div class="brand">
-          <div class="brand-mark" aria-hidden="true"><img src="assets/icons/signacard-mascot.png" alt=""></div>
+          <div class="brand-mark" aria-hidden="true"><img src="assets/icons/siggy-red-panda.png" alt=""></div>
           <div>
-            <h1 class="brand-title">SignaCard</h1>
+            <h1 class="brand-title">Siggy</h1>
             <p class="brand-subtitle">Email signature cards</p>
           </div>
         </div>
@@ -1282,20 +1299,20 @@
             </svg>
             <span class="action-label">Save</span>
           </button>
-          <button class="btn primary" type="button" id="copy-rich" aria-label="Copy" title="Copy">
+          <button class="btn primary" type="button" id="copy-rich" aria-label="Copy signature" title="Copy signature">
             <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="9" y="9" width="11" height="11" rx="2"></rect>
               <rect x="4" y="4" width="11" height="11" rx="2"></rect>
             </svg>
-            <span class="action-label">Copy</span>
+            <span class="action-label">Copy signature</span>
           </button>
-          <button class="btn" type="button" id="download-html" aria-label="Download" title="Download">
+          <button class="btn" type="button" id="download-html" aria-label="Download HTML file" title="Download HTML file">
             <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 3v12"></path>
               <path d="m7 10 5 5 5-5"></path>
               <path d="M5 21h14"></path>
             </svg>
-            <span class="action-label">Download</span>
+            <span class="action-label">HTML file</span>
           </button>
         </div>
         <div class="mobile-panel-actions" aria-label="Mobile editing panels">
@@ -1374,8 +1391,8 @@
           <input id="photo" name="photo" inputmode="url">
         </div>
         <div class="field">
-          <label for="photo-upload">Test image</label>
-          <div class="drop-zone" id="drop-zone" tabindex="0">Drop or choose a local preview image. It stays in this browser until you host it.</div>
+          <label for="photo-upload">Local preview image</label>
+          <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Choose a local preview image">Drop or choose an image for testing. Siggy compresses it for this browser only; host the image before using it in a real email signature.</div>
           <input class="hidden-file" type="file" accept="image/*" id="photo-upload">
         </div>
         <details class="subsection">
@@ -1438,7 +1455,7 @@
           </div>
         </div>
         <div class="two">
-          <button class="btn" type="button" id="save-card">Save Card</button>
+          <button class="btn" type="button" id="save-card">Save card</button>
           <button class="btn" type="button" id="reset-card">Reset</button>
         </div>
         <details class="subsection">
@@ -1495,25 +1512,25 @@
         </details>
         </section>
         <details class="subsection">
-          <summary>HTML and backup</summary>
+          <summary>Export and backup</summary>
           <div class="action-grid">
-            <button class="btn" type="button" id="panel-copy-html">Copy code</button>
-            <button class="btn" type="button" id="panel-download-image">Download image</button>
-            <button class="btn" type="button" id="panel-export-json">Backup</button>
-            <button class="btn" type="button" id="panel-import-json">Import</button>
+            <button class="btn" type="button" id="panel-copy-html">Copy HTML</button>
+            <button class="btn" type="button" id="panel-download-image">Image file</button>
+            <button class="btn" type="button" id="panel-export-json">Download backup</button>
+            <button class="btn" type="button" id="panel-import-json">Import backup</button>
           </div>
           <div class="field">
             <label for="html-output">HTML code</label>
             <textarea class="html-output" id="html-output" readonly spellcheck="false"></textarea>
           </div>
         </details>
-        <p class="hint">Signatures are exported as inline, table-based HTML. Locked modes use explicit colors so your signature does not change just because the viewer uses dark mode.</p>
+        <p class="hint">Siggy exports inline, table-based HTML for email clients. Local images are previews only, and the image download may use SVG fallback when a browser blocks PNG rendering.</p>
       </form>
       <input class="hidden-file" type="file" accept="application/json" id="json-file">
     </aside>
 
-    <nav class="mobile-tabs" aria-label="Mobile panels">
-      <button type="button" id="tab-templates">
+    <nav class="mobile-tabs" aria-label="Mobile panels" role="tablist">
+      <button type="button" id="tab-templates" role="tab" aria-selected="false" aria-controls="templates-panel">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
           <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
@@ -1522,7 +1539,7 @@
         </svg>
         <span>Designs</span>
       </button>
-      <button type="button" id="tab-preview" class="active">
+      <button type="button" id="tab-preview" class="active" role="tab" aria-selected="true" aria-controls="signature-preview">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="3" y="5" width="18" height="14" rx="3"></rect>
           <path d="M7 10h5"></path>
@@ -1530,7 +1547,7 @@
         </svg>
         <span>Preview</span>
       </button>
-      <button type="button" id="tab-details">
+      <button type="button" id="tab-details" role="tab" aria-selected="false" aria-controls="details-panel">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 7h10"></path>
           <path d="M4 17h10"></path>
@@ -1544,10 +1561,14 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
+    const APP_NAME = 'Siggy';
+    const LEGACY_APP_NAME = 'SignaCard';
     const STORAGE_KEY = 'signacard.v2';
-    const STATE_VERSION = 4;
+    const STATE_VERSION = 5;
     const SAVED_KEY = 'signacard.savedCards.v1';
     const HIDDEN_DESIGNS_KEY = 'signacard.hiddenDesigns.v1';
+    const MAX_LOCAL_IMAGE_BYTES = 450 * 1024;
+    const MAX_LOCAL_IMAGE_DIMENSION = 900;
     const transparentPixel = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3Crect width="1" height="1" fill="transparent"/%3E%3C/svg%3E';
     const avatarPaths = Array.from({ length: 48 }, (_, index) => `assets/avatars/avatar-${index + 1}.png`);
     const defaultPhoto = avatarPaths[0];
@@ -1922,15 +1943,38 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        if (state.photoSource === 'local') {
+          state.photo = defaultPhoto;
+          state.photoSource = 'avatar';
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          } catch {
+            // Browser storage can still fail in private windows.
+          }
+          toast('Local image was too large to keep');
+        } else {
+          toast('Could not save settings locally');
+        }
+      }
     }
 
     function saveSavedCards() {
-      localStorage.setItem(SAVED_KEY, JSON.stringify(savedCards));
+      try {
+        localStorage.setItem(SAVED_KEY, JSON.stringify(savedCards));
+      } catch {
+        toast('Could not save card library');
+      }
     }
 
     function saveHiddenDesigns() {
-      localStorage.setItem(HIDDEN_DESIGNS_KEY, JSON.stringify(hiddenDesigns));
+      try {
+        localStorage.setItem(HIDDEN_DESIGNS_KEY, JSON.stringify(hiddenDesigns));
+      } catch {
+        toast('Could not save design library');
+      }
     }
 
     function markCustomFields(...fields) {
@@ -2526,7 +2570,15 @@
     }
 
     function signatureHtml() {
-      return applyDesignControls(signatureHtmlRaw());
+      return renderSignatureHtml(state);
+    }
+
+    function renderSignatureHtml(model) {
+      const previous = state;
+      state = sanitizeState(model);
+      const html = applyDesignControls(signatureHtmlRaw());
+      state = previous;
+      return html;
     }
 
     function familySignature(meta, c, d) {
@@ -2793,10 +2845,9 @@
     }
 
     function swatchHtml(tpl) {
-      const previous = { ...state };
       const designDefaults = templateDesignDefaults(tpl);
       const profile = templateProfile(tpl);
-      state = {
+      const previewState = {
         ...state,
         name: profile.name,
         title: profile.title,
@@ -2820,8 +2871,7 @@
         photoSource: 'avatar',
         ...designDefaults
       };
-      const html = signatureHtml();
-      state = previous;
+      const html = renderSignatureHtml(previewState);
       return `<div class="mini-preview-inner">${miniPreviewHtml(html)}</div>`;
     }
 
@@ -2923,14 +2973,42 @@
     function renderSavedCards() {
       $('#saved-list').innerHTML = savedCards.length ? savedCards.map((card) => `
         <div class="saved-card">
+          <div class="saved-card-preview" aria-hidden="true">${savedCardPreviewHtml(card)}</div>
           <div class="saved-card-title">${escapeHtml(card.label)}</div>
           <div class="saved-card-meta">${escapeHtml(card.savedAt ? new Date(card.savedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Saved card')}</div>
           <div class="saved-card-actions">
             <button class="btn" type="button" data-load-saved="${card.id}">Load</button>
+            <button class="btn" type="button" data-duplicate-saved="${card.id}">Duplicate</button>
             <button class="btn danger" type="button" data-delete-saved="${card.id}">Delete</button>
           </div>
         </div>
-      `).join('') : `<div class="hint">No saved cards yet.</div>`;
+      `).join('') : `<div class="hint">Saved signatures will appear here with a preview.</div>`;
+      fitSavedPreviews();
+    }
+
+    function savedCardPreviewHtml(card) {
+      const previewState = sanitizeState({
+        ...(card.state || defaultState),
+        cardWidth: 300,
+        fontScale: 72,
+        paddingScale: 58,
+        radius: Math.min(Number(card.state?.radius ?? 12), 12)
+      });
+      return `<div class="mini-preview-inner">${miniPreviewHtml(renderSignatureHtml(previewState))}</div>`;
+    }
+
+    function fitSavedPreviews() {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.saved-card-preview').forEach((preview) => {
+          const inner = preview.querySelector('.mini-preview-inner');
+          const table = inner?.querySelector('table');
+          if (!inner || !table) return;
+          const maxWidth = Math.max(1, preview.getBoundingClientRect().width);
+          const scale = Math.min(1, Math.max(0.50, maxWidth / 320));
+          inner.style.setProperty('--mini-scale', String(scale));
+          preview.style.height = `${Math.ceil(Math.max(1, table.offsetHeight) * scale)}px`;
+        });
+      });
     }
 
     async function copyRich() {
@@ -2954,7 +3032,7 @@
           document.execCommand('copy');
           holder.remove();
         }
-        toast('Copied signature for pasting');
+        toast('Copied signature');
       } catch {
         try {
           await writeTextToClipboard(html);
@@ -3000,7 +3078,8 @@
 
     function downloadBackup() {
       const data = JSON.stringify({
-        app: 'SignaCard',
+        app: APP_NAME,
+        legacyApp: LEGACY_APP_NAME,
         version: STATE_VERSION,
         exportedAt: new Date().toISOString(),
         state,
@@ -3010,7 +3089,7 @@
       const blob = new Blob([data], { type: 'application/json' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `SignaCard Backup - ${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `Siggy Backup - ${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(link.href);
       toast('Downloaded backup');
@@ -3021,10 +3100,10 @@
       const link = document.createElement('a');
       const name = (state.name || 'signature').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'signature';
       link.href = URL.createObjectURL(blob);
-      link.download = `${name}-signacard.html`;
+      link.download = `${name}-siggy.html`;
       link.click();
       URL.revokeObjectURL(link.href);
-      toast('Downloaded HTML');
+      toast('Downloaded HTML file');
     }
 
     function downloadBlob(blob, filename) {
@@ -3088,22 +3167,22 @@
           canvas.toBlob((blob) => {
             URL.revokeObjectURL(url);
             if (!blob) {
-              downloadBlob(svgBlob, `${name}-signacard.svg`);
+              downloadBlob(svgBlob, `${name}-siggy.svg`);
               toast('Downloaded SVG image');
               return;
             }
-            downloadBlob(blob, `${name}-signacard.png`);
+            downloadBlob(blob, `${name}-siggy.png`);
             toast('Downloaded PNG image');
           }, 'image/png');
         } catch {
           URL.revokeObjectURL(url);
-          downloadBlob(svgBlob, `${name}-signacard.svg`);
+          downloadBlob(svgBlob, `${name}-siggy.svg`);
           toast('Downloaded SVG image');
         }
       };
       image.onerror = () => {
         URL.revokeObjectURL(url);
-        downloadBlob(svgBlob, `${name}-signacard.svg`);
+        downloadBlob(svgBlob, `${name}-siggy.svg`);
         toast('Downloaded SVG image');
       };
       image.src = url;
@@ -3126,6 +3205,23 @@
       saveSavedCards();
       renderSavedCards();
       toast('Saved card');
+    }
+
+    function duplicateSavedCard(id) {
+      const card = savedCards.find(item => item.id === id);
+      if (!card) return;
+      const copyId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`;
+      savedCards.unshift({
+        ...card,
+        id: copyId,
+        label: `${card.label || 'Saved card'} copy`,
+        state: sanitizeState(card.state),
+        savedAt: new Date().toISOString()
+      });
+      savedCards = savedCards.slice(0, 24);
+      saveSavedCards();
+      renderSavedCards();
+      toast('Duplicated saved card');
     }
 
     function randomItem(items) {
@@ -3189,21 +3285,56 @@
       toast('Reset card');
     }
 
-    function readPhotoFile(file) {
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        image.onload = () => {
+          URL.revokeObjectURL(url);
+          const ratio = Math.min(1, MAX_LOCAL_IMAGE_DIMENSION / Math.max(image.width, image.height));
+          const width = Math.max(1, Math.round(image.width * ratio));
+          const height = Math.max(1, Math.round(image.height * ratio));
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0, width, height);
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              reject(new Error('Image compression failed'));
+              return;
+            }
+            resolve(await blobToDataUrl(blob));
+          }, 'image/jpeg', 0.86);
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Could not read image'));
+        };
+        image.src = url;
+      });
+    }
+
+    async function readPhotoFile(file) {
       if (!file || !file.type.startsWith('image/')) {
         toast('Choose an image file');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        state.photo = reader.result;
+      try {
+        const compressed = await compressImageFile(file);
+        if (compressed.length > MAX_LOCAL_IMAGE_BYTES * 1.45) {
+          toast('Image is still too large for local preview');
+          return;
+        }
+        state.photo = compressed;
         state.photoSource = 'local';
         markCustomFields('photo', 'photoSource');
         saveState();
         render();
-        toast('Local preview image saved');
-      };
-      reader.readAsDataURL(file);
+        toast('Local preview image saved for testing');
+      } catch {
+        toast('Could not use that image');
+      }
     }
 
     document.addEventListener('input', (event) => {
@@ -3220,7 +3351,7 @@
         reader.onload = () => {
           try {
             const imported = JSON.parse(reader.result);
-            if (imported && imported.app === 'SignaCard' && imported.state) {
+            if (imported && [APP_NAME, LEGACY_APP_NAME].includes(imported.app) && imported.state) {
               state = sanitizeState(imported.state);
               savedCards = Array.isArray(imported.savedCards)
                 ? imported.savedCards.slice(0, 24).map(card => ({ ...card, state: sanitizeState(card.state) }))
@@ -3324,6 +3455,8 @@
         renderSavedCards();
         toast('Deleted saved card');
       }
+      const duplicateSaved = event.target.closest('[data-duplicate-saved]');
+      if (duplicateSaved) duplicateSavedCard(duplicateSaved.dataset.duplicateSaved);
     });
 
     $('#copy-rich').addEventListener('click', copyRich);
@@ -3390,6 +3523,9 @@
       $('#tab-templates').classList.toggle('active', panel === 'templates');
       $('#tab-preview').classList.toggle('active', panel === 'preview');
       $('#tab-details').classList.toggle('active', panel === 'details');
+      $('#tab-templates').setAttribute('aria-selected', String(panel === 'templates'));
+      $('#tab-preview').setAttribute('aria-selected', String(panel === 'preview'));
+      $('#tab-details').setAttribute('aria-selected', String(panel === 'details'));
       $('#mobile-open-designs').classList.toggle('primary', panel === 'templates');
       $('#mobile-open-details').classList.toggle('primary', panel === 'details');
       if (panel === 'templates') fitMiniPreviews();
