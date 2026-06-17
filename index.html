@@ -1323,7 +1323,7 @@
       <section class="stage">
         <div class="preview-shell">
           <div class="preview-label">
-            <span class="preview-heading"><span>Signature preview</span><span id="mode-note">Locked colors</span></span>
+            <span class="preview-heading"><span>Signature preview</span><span id="mode-note">Fixed appearance</span></span>
             <div class="preview-toolbar" aria-label="Preview width">
               <button class="preview-size active" type="button" data-preview-size="desktop">Wide</button>
               <button class="preview-size" type="button" data-preview-size="compact">Fit</button>
@@ -1418,11 +1418,11 @@
             <input id="accent" name="accent" type="color">
           </div>
           <div class="field">
-            <label for="colorMode">Signature Colors</label>
+            <label for="colorMode">Appearance</label>
             <select id="colorMode" name="colorMode">
-              <option value="locked-light">Locked light</option>
-              <option value="locked-dark">Locked dark</option>
-              <option value="auto">Let email client decide</option>
+              <option value="locked-light">Light appearance</option>
+              <option value="locked-dark">Dark appearance</option>
+              <option value="auto">Adapt to email app</option>
             </select>
           </div>
         </div>
@@ -2910,7 +2910,7 @@
       $('#signature-preview').innerHTML = html;
       const output = $('#html-output');
       if (output) output.value = html.trim();
-      $('#mode-note').textContent = state.colorMode === 'auto' ? 'Auto colors' : 'Locked colors';
+      $('#mode-note').textContent = state.colorMode === 'auto' ? 'Adapts to email app' : 'Fixed appearance';
       renderPreviewMode();
       renderCategories();
       renderTemplates();
@@ -2923,7 +2923,7 @@
       $('#signature-preview').innerHTML = html;
       const output = $('#html-output');
       if (output) output.value = html.trim();
-      $('#mode-note').textContent = state.colorMode === 'auto' ? 'Auto colors' : 'Locked colors';
+      $('#mode-note').textContent = state.colorMode === 'auto' ? 'Adapts to email app' : 'Fixed appearance';
       renderPreviewMode();
       updateOutputs();
       renderAvatars();
