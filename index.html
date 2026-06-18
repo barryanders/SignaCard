@@ -623,11 +623,36 @@
       display: grid;
       gap: 13px;
     }
+    .control-section:not([open]) {
+      gap: 0;
+    }
     .control-heading {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 10px;
+      cursor: pointer;
+      list-style: none;
+    }
+    .control-heading::-webkit-details-marker {
+      display: none;
+    }
+    .control-heading::after {
+      content: "+";
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .control-section[open] > .control-heading::after {
+      content: "-";
     }
     .control-heading h3 {
       margin: 0;
@@ -1247,8 +1272,8 @@
     <aside class="inspector" id="details-panel">
       <h2 class="section-title">Builder</h2>
       <form class="form-grid" id="details-form">
-        <section class="control-section">
-          <div class="control-heading"><h3>Identity</h3><span>Name, role, contact</span></div>
+        <details class="control-section" open>
+          <summary class="control-heading"><h3>Identity</h3><span>Name, role, contact</span></summary>
         <div class="field">
           <label for="name">Name</label>
           <input id="name" name="name" autocomplete="name">
@@ -1289,10 +1314,10 @@
           <label for="tagline">Tagline</label>
           <textarea id="tagline" name="tagline"></textarea>
         </div>
-        </section>
+        </details>
 
-        <section class="control-section">
-          <div class="control-heading"><h3>Image</h3><span>Avatar or hosted photo</span></div>
+        <details class="control-section">
+          <summary class="control-heading"><h3>Image</h3><span>Avatar or hosted photo</span></summary>
         <div class="field">
           <label for="photo">Hosted Photo URL</label>
           <input id="photo" name="photo" inputmode="url">
@@ -1316,10 +1341,10 @@
             <option value="square">Square</option>
           </select>
         </div>
-        </section>
+        </details>
 
-        <section class="control-section">
-          <div class="control-heading"><h3>Style</h3><span>Size, color, typography</span></div>
+        <details class="control-section">
+          <summary class="control-heading"><h3>Style</h3><span>Size, color, typography</span></summary>
         <div class="two">
           <div class="field">
             <label for="accent">Accent</label>
@@ -1352,8 +1377,6 @@
           <button class="btn" type="button" id="save-card">Save card</button>
           <button class="btn" type="button" id="reset-card">Reset</button>
         </div>
-        <details class="subsection">
-          <summary>Advanced design</summary>
           <div class="two">
             <div class="field">
               <label for="paddingScale">Padding</label>
@@ -1404,9 +1427,8 @@
             </div>
           </div>
         </details>
-        </section>
-        <details class="subsection">
-          <summary>Export and backup</summary>
+        <details class="control-section">
+          <summary class="control-heading"><h3>Export</h3><span>HTML, image, backup</span></summary>
           <div class="action-grid">
             <button class="btn" type="button" id="panel-copy-html">Copy HTML</button>
             <button class="btn" type="button" id="panel-download-image">Image file</button>
@@ -1417,8 +1439,8 @@
             <label for="html-output">HTML code</label>
             <textarea class="html-output" id="html-output" readonly spellcheck="false"></textarea>
           </div>
+          <p class="hint">Siggy exports inline, table-based HTML for email clients. Local images are previews only, and the image download may use SVG fallback when a browser blocks PNG rendering.</p>
         </details>
-        <p class="hint">Siggy exports inline, table-based HTML for email clients. Local images are previews only, and the image download may use SVG fallback when a browser blocks PNG rendering.</p>
       </form>
       <input class="hidden-file" type="file" accept="application/json" id="json-file">
     </aside>
