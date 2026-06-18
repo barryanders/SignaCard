@@ -245,8 +245,7 @@
       gap: 8px;
       margin-bottom: 14px;
     }
-    .design-tools input,
-    .design-tools select {
+    .design-tools input {
       width: 100%;
       min-height: 40px;
       border: 1px solid var(--line);
@@ -255,110 +254,6 @@
       padding: 9px 11px;
       outline: none;
       font-weight: 600;
-    }
-    .filter-details {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--panel-strong);
-      overflow: hidden;
-    }
-    .filter-details summary {
-      min-height: 38px;
-      padding: 0 11px;
-      cursor: pointer;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: 750;
-      list-style: none;
-    }
-    .filter-details summary::-webkit-details-marker {
-      display: none;
-    }
-    .filter-details summary::after {
-      content: "+";
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1;
-    }
-    .filter-details[open] summary::after {
-      content: "-";
-    }
-    .filter-details select {
-      border: 0;
-      border-top: 1px solid var(--line);
-      border-radius: 0;
-      background: var(--panel);
-    }
-    .look-filter {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
-    }
-    .look-button {
-      min-height: 54px;
-      padding: 8px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--panel-strong);
-      color: var(--muted);
-      display: grid;
-      justify-items: start;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 750;
-      line-height: 1.1;
-    }
-    .look-button.active {
-      color: var(--text);
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent);
-    }
-    .look-swatch {
-      width: 100%;
-      height: 18px;
-      border-radius: 6px;
-      border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
-      background: #ffffff;
-      overflow: hidden;
-      position: relative;
-    }
-    .look-swatch.all {
-      background: linear-gradient(90deg, #ffffff 0 33%, #111214 33% 66%, #f4c763 66%);
-    }
-    .look-swatch.light { background: #ffffff; }
-    .look-swatch.dark { background: #111214; }
-    .look-swatch.color {
-      background: #ffffff;
-    }
-    .look-swatch.color::before {
-      content: "";
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: 34%;
-      background: #f4c763;
-    }
-    .look-swatch.clean {
-      background:
-        linear-gradient(90deg, rgba(15, 23, 42, 0.14) 1px, transparent 1px),
-        linear-gradient(rgba(15, 23, 42, 0.14) 1px, transparent 1px),
-        #ffffff;
-      background-size: 8px 8px;
-    }
-    .look-swatch.classic {
-      background: #fff9ed;
-    }
-    .look-swatch.classic::after {
-      content: "";
-      position: absolute;
-      right: 4px;
-      top: 4px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      border: 2px double #9b6a3f;
     }
     .template-card {
       width: 100%;
@@ -1250,13 +1145,6 @@
       </div>
       <div class="design-tools">
         <input id="design-search" type="search" placeholder="Search designs" aria-label="Search designs">
-        <div class="look-filter" id="style-filter" aria-label="Filter designs by look"></div>
-        <details class="filter-details">
-          <summary>Industry</summary>
-          <select id="category-filter" aria-label="Filter designs by category">
-            <option value="all">All categories</option>
-          </select>
-        </details>
       </div>
       <div class="template-list" id="template-list"></div>
       <div class="sidebar-section">
@@ -1390,6 +1278,7 @@
           <label for="photo">Hosted Photo URL</label>
           <input id="photo" name="photo" inputmode="url">
         </div>
+        <button class="btn" type="button" id="remove-photo">Remove image</button>
         <div class="field">
           <label for="photo-upload">Local preview image</label>
           <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Choose a local preview image">Drop or choose an image for testing. Siggy compresses it for this browser only; host the image before using it in a real email signature.</div>
@@ -1425,20 +1314,6 @@
               <option value="auto">Adapt to email app</option>
             </select>
           </div>
-        </div>
-        <div class="field">
-          <label for="cardIcon">Icon</label>
-          <select id="cardIcon" name="cardIcon">
-            <option value="">No icon</option>
-            <option value="★">Star</option>
-            <option value="✓">Check</option>
-            <option value="✦">Spark</option>
-            <option value="●">Dot</option>
-            <option value="◆">Diamond</option>
-            <option value="✚">Care</option>
-            <option value="⌂">Home</option>
-            <option value="⚑">Flag</option>
-          </select>
         </div>
         <div class="field">
           <label>Size Presets</label>
@@ -1830,7 +1705,6 @@
       website: 'brightline.example',
       location: 'Tulsa, OK',
       tagline: 'Clear communication, thoughtful design, and useful work for people who need it.',
-      cardIcon: '',
       accent: '#ef5b49',
       colorMode: 'locked-dark',
       photoStyle: 'template',
@@ -1854,7 +1728,7 @@
     const customizableFields = [
       'name', 'title', 'company', 'logo', 'email', 'phone', 'website', 'location', 'tagline',
       'photo', 'photoSource', 'photoStyle',
-      'cardIcon', 'accent', 'colorMode', 'preset', 'cardWidth', 'fontScale', 'paddingScale', 'radius',
+      'accent', 'colorMode', 'preset', 'cardWidth', 'fontScale', 'paddingScale', 'radius',
       'borderWidth', 'borderStyle', 'borderColor', 'cardBg', 'textColor', 'fontFamily'
     ];
 
@@ -1862,8 +1736,6 @@
     let savedCards = loadJson(SAVED_KEY, []);
     let hiddenDesigns = loadJson(HIDDEN_DESIGNS_KEY, []);
     let designSearch = '';
-    let categoryFilter = 'all';
-    let styleFilter = 'all';
 
     const $ = (sel) => document.querySelector(sel);
     const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
@@ -1919,6 +1791,7 @@
 
     function sanitizeState(value) {
       const merged = { ...defaultState, ...(value || {}), stateVersion: STATE_VERSION };
+      delete merged.cardIcon;
       const clampNumber = (candidate, fallback, min, max) => {
         const number = Number(candidate);
         if (!Number.isFinite(number)) return fallback;
@@ -1929,8 +1802,8 @@
       if (!['desktop', 'compact', 'mobile'].includes(merged.previewSize)) merged.previewSize = defaultState.previewSize;
       if (!['locked-light', 'locked-dark', 'auto'].includes(merged.colorMode)) merged.colorMode = defaultState.colorMode;
       if (!['template', 'circle', 'soft', 'square'].includes(merged.photoStyle)) merged.photoStyle = defaultState.photoStyle;
+      if (!['avatar', 'local', 'url', 'none'].includes(merged.photoSource)) merged.photoSource = defaultState.photoSource;
       if (!['solid', 'dashed', 'double'].includes(merged.borderStyle)) merged.borderStyle = defaultState.borderStyle;
-      if (!['', '★', '✓', '✦', '●', '◆', '✚', '⌂', '⚑'].includes(merged.cardIcon)) merged.cardIcon = defaultState.cardIcon;
       merged.customFields = Array.isArray(merged.customFields)
         ? merged.customFields.filter(field => customizableFields.includes(field))
         : [];
@@ -2030,7 +1903,16 @@
       return items.map((item, index) => index < items.length - 1 ? item.replace('</span>', `${separator}</span>`) : item).join('');
     }
 
+    function joinNonEmpty(separator, ...parts) {
+      return parts.filter(part => String(part || '').trim()).join(separator);
+    }
+
+    function dotJoin(...parts) {
+      return joinNonEmpty(' · ', ...parts);
+    }
+
     function imageCell(size, radius, borderColor) {
+      if (!hasPhoto()) return '<!--siggy-no-photo-->';
       const src = escapeHtml(safeUrl(state.photo, transparentPixel));
       if (state.photoStyle === 'circle') radius = size / 2;
       if (state.photoStyle === 'soft') radius = 18;
@@ -2040,14 +1922,16 @@
 
     function logoBlock(c, align = 'left') {
       const logo = String(state.logo || state.company || '').trim();
-      const icon = String(state.cardIcon || '').trim();
-      const iconHtml = icon ? `<span style="display:inline-block; padding-right:${logo ? '8px' : '0'}; color:${c.inverse}; font-weight:900;">${escapeHtml(icon)}</span>` : '';
-      if (!logo) return iconHtml ? `<div style="font-size:24px; line-height:1; text-align:${align};">${iconHtml}</div>` : '';
+      if (!logo) return '';
       if (/^https?:\/\//i.test(logo) || /^data:image\//i.test(logo)) {
         const image = `<img src="${escapeHtml(logo)}" alt="${escapeHtml(state.company)}" style="display:inline-block; vertical-align:middle; max-width:210px; max-height:52px; margin:${align === 'center' ? '0 auto' : '0'};">`;
-        return icon ? `<div style="font-size:24px; line-height:1; color:${c.inverse}; text-align:${align};">${iconHtml}${image}</div>` : image;
+        return image;
       }
-      return `<div style="font-size:24px; line-height:1; color:${c.inverse}; font-weight:700; letter-spacing:0.02em; text-align:${align};">${iconHtml}${escapeHtml(logo)}</div>`;
+      return `<div style="font-size:24px; line-height:1; color:${c.inverse}; font-weight:700; letter-spacing:0.02em; text-align:${align};">${escapeHtml(logo)}</div>`;
+    }
+
+    function hasPhoto() {
+      return state.photoSource !== 'none' && Boolean(String(state.photo || '').trim());
     }
 
     function templateMeta() {
@@ -2123,6 +2007,12 @@
         .replace(/border-radius:\d+px 0 0 \d+px;/g, `border-radius:${radius}px 0 0 ${radius}px;`)
         .replace(/border-radius:0 \d+px \d+px 0;/g, `border-radius:0 ${radius}px ${radius}px 0;`)
         .replace(/border-radius:0 0 \d+px \d+px;/g, `border-radius:0 0 ${radius}px ${radius}px;`);
+      if (!hasPhoto()) {
+        output = output
+          .replace(/<td\b[^>]*>\s*<!--siggy-no-photo-->\s*<\/td>/g, '')
+          .replace(/padding-left:\d+px;?/g, 'padding-left:0;');
+      }
+      output = output.replace(/<div style="(?=[^"]*font-size:)[^"]*">\s*<\/div>/g, '');
       output = output.replace(/font-size:(\d+)px/g, (_, size) => `font-size:${Math.round(Number(size) * fontScale)}px`);
       output = output.replace(/padding:([0-9]+)px(?: ([0-9]+)px)?/g, (_, a, b) => {
         const first = Math.max(0, Math.round(Number(a) * paddingScale));
@@ -2131,6 +2021,7 @@
         return `padding:${first}px ${second}px`;
       });
       output = output.replace(/padding-left:([0-9]+)px/g, (_, size) => {
+        if (Number(size) === 0) return 'padding-left:0';
         const scaled = Math.max(8, Math.round(Number(size) * paddingScale));
         return `padding-left:${scaled}px`;
       });
@@ -2182,7 +2073,7 @@
               <td width="88" valign="top">${imageCell(76, 38, '#d7c8b4')}</td>
               <td valign="top" style="padding-left:18px;">
                 <div style="font-size:28px; line-height:1.05; font-weight:700; letter-spacing:-0.02em;">${name}</div>
-                <div style="font-family:Arial, sans-serif; color:${c.muted}; font-size:15px; padding-top:4px;">${title}${company ? ` · ${company}` : ''}</div>
+                <div style="font-family:Arial, sans-serif; color:${c.muted}; font-size:15px; padding-top:4px;">${dotJoin(title, company)}</div>
                 <div style="height:1px; background:${accent}; width:76px; margin:14px 0;"></div>
                 <div style="font-family:Arial, sans-serif; font-size:13px; line-height:1.7;">${contactLine(c)}</div>
               </td>
@@ -2271,7 +2162,7 @@
               <td width="150" valign="middle" align="center" style="background:${accent}; border-radius:24px 0 0 24px; padding:20px; text-align:center; vertical-align:middle;">${imageCell(94, 28, 'rgba(255,255,255,.6)')}</td>
               <td valign="top" style="padding:23px;">
                 <div style="font-size:30px; line-height:1.05; font-weight:900;">${name}</div>
-                <div style="font-size:15px; color:#806b4b; padding-top:4px;">${title} · ${company}</div>
+                <div style="font-size:15px; color:#806b4b; padding-top:4px;">${dotJoin(title, company)}</div>
                 <div style="font-size:13px; line-height:1.7; padding-top:14px;">${contactLine({ ...c, text: '#251a12', muted: '#b0905a' })}</div>
               </td>
             </tr></table>
@@ -2363,7 +2254,7 @@
               <td valign="top" style="padding-left:18px;">
                 <div style="font-size:11px; letter-spacing:3px; color:${accent}; text-transform:uppercase; font-weight:900;">Transmission verified</div>
                 <div style="font-size:31px; line-height:1.04; font-weight:900; letter-spacing:-0.04em;">${name}</div>
-                <div style="font-size:15px; color:#9fb2d8; padding-top:4px;">${title} · ${company}</div>
+                <div style="font-size:15px; color:#9fb2d8; padding-top:4px;">${dotJoin(title, company)}</div>
                 <div style="height:2px; background:${accent}; box-shadow:0 0 12px ${accent}; width:180px; margin:13px 0;"></div>
                 <div style="font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#eef6ff', muted: '#617195' })}</div>
               </td>
@@ -2456,7 +2347,7 @@
           <tr>
             <td valign="top" style="padding:22px;">
               <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
-              <div style="font-size:15px; color:#475569; padding-top:4px;">${title} · ${company}</div>
+              <div style="font-size:15px; color:#475569; padding-top:4px;">${dotJoin(title, company)}</div>
               <div style="display:inline-block; background:${soft(accent, 0.12)}; color:${accent}; padding:7px 10px; border-radius:999px; margin-top:12px; font-size:12px; font-weight:900;">Available for your next move</div>
               <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#0f172a', muted: '#94a3b8' })}</div>
             </td>
@@ -2472,7 +2363,7 @@
               <td style="padding-left:18px;">
                 <div style="font-size:29px; line-height:1.05; font-weight:900;">${name}</div>
                 <div style="font-size:15px; color:#855740; padding-top:4px;">${title}</div>
-                <div style="font-size:13px; line-height:1.55; color:#855740; padding-top:10px;">${tagline}</div>
+                ${tagline ? `<div style="font-size:13px; line-height:1.55; color:#855740; padding-top:10px;">${tagline}</div>` : ''}
                 <div style="font-size:13px; line-height:1.7; padding-top:11px;">${contactLine({ ...c, text: '#30190f', muted: '#b08470' })}</div>
               </td>
             </tr></table>
@@ -2486,7 +2377,7 @@
               <td width="100" valign="top">${imageCell(82, 18, '#f2d1b8')}</td>
               <td valign="top" style="padding-left:18px;">
                 <div style="font-family:Georgia, 'Times New Roman', serif; font-size:31px; line-height:1.05; font-weight:700;">${name}</div>
-                <div style="font-size:15px; color:#7f5547; padding-top:4px;">${title} · ${company}</div>
+                <div style="font-size:15px; color:#7f5547; padding-top:4px;">${dotJoin(title, company)}</div>
                 <div style="height:1px; background:${accent}; margin:13px 0; width:150px;"></div>
                 <div style="font-size:13px; line-height:1.7;">${contactLine({ ...c, text: '#29130f', muted: '#aa7b68' })}</div>
               </td>
@@ -2517,7 +2408,7 @@
               <td style="padding-left:18px;">
                 <div style="font-size:29px; line-height:1.05; font-weight:800;">${name}</div>
                 <div style="font-size:15px; color:#607868; padding-top:4px;">${title}</div>
-                <div style="font-size:13px; color:#607868; line-height:1.55; padding-top:10px;">${tagline}</div>
+                ${tagline ? `<div style="font-size:13px; color:#607868; line-height:1.55; padding-top:10px;">${tagline}</div>` : ''}
                 <div style="font-size:13px; line-height:1.7; padding-top:11px;">${contactLine({ ...c, text: '#20352b', muted: '#8ca390' })}</div>
               </td>
             </tr></table>
@@ -2639,7 +2530,7 @@
               <td valign="top" style="padding-left:16px;">
                 <div style="font-size:11px; text-transform:uppercase; letter-spacing:2px; color:${accent}; font-weight:900;">${category}</div>
                 <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
-                <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${title}${company ? ` · ${company}` : ''}</div>
+                <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${dotJoin(title, company)}</div>
                 <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contact}</div>
               </td>
             </tr></table>
@@ -2668,7 +2559,7 @@
             <td valign="top" style="padding:23px;">
               <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">${category}</div>
               <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
-              <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${title} · ${company}</div>
+              <div style="font-size:15px; color:${lightMuted}; padding-top:4px;">${dotJoin(title, company)}</div>
               <div style="font-size:13px; line-height:1.7; padding-top:14px;">${contact}</div>
             </td>
           </tr>
@@ -2765,13 +2656,10 @@
       const list = $('#template-list');
       const visible = templates.filter(tpl => !hiddenDesigns.includes(tpl.id));
       const matches = visible.filter((tpl) => {
-        const visualLabels = templateVisualLabels(tpl).join(' ');
-        const haystack = `${tpl.name} ${tpl.category || ''} ${tpl.family || ''} ${tpl.note || ''} ${visualLabels}`.toLowerCase();
-        return (categoryFilter === 'all' || tpl.category === categoryFilter) &&
-          (styleFilter === 'all' || templateVisualTags(tpl).includes(styleFilter)) &&
-          (!designSearch || haystack.includes(designSearch.toLowerCase()));
+        const haystack = `${tpl.name} ${tpl.category || ''} ${tpl.family || ''} ${tpl.note || ''}`.toLowerCase();
+        return !designSearch || haystack.includes(designSearch.toLowerCase());
       });
-      const filtered = Boolean(designSearch) || categoryFilter !== 'all' || styleFilter !== 'all';
+      const filtered = Boolean(designSearch);
       $('#design-count').textContent = filtered ? `${matches.length} shown` : 'Included';
       const mobileCount = $('#mobile-design-count');
       mobileCount.textContent = filtered ? matches.length : '';
@@ -2791,7 +2679,7 @@
         </button>`;
       }).join('') || `<div class="empty-state">
         <strong>No designs match that search.</strong>
-        <span>Clear the search or choose another filter.</span>
+        <span>Clear the search to see every included design.</span>
       </div>`;
       fitMiniPreviews();
     }
@@ -2813,39 +2701,6 @@
           preview.style.height = `${Math.ceil(height * fittedScale)}px`;
         });
       });
-    }
-
-    const visualFilterOptions = [
-      ['all', 'All'],
-      ['light', 'Light'],
-      ['dark', 'Dark'],
-      ['color', 'Color'],
-      ['clean', 'Clean'],
-      ['classic', 'Classic']
-    ];
-
-    function templateVisualTags(tpl) {
-      const tags = new Set([tpl.mode === 'locked-dark' ? 'dark' : 'light']);
-      const family = tpl.family || '';
-      if (['split', 'band', 'darkline', 'pill', 'soft'].includes(family)) tags.add('color');
-      if (['minimal', 'grid', 'letterhead'].includes(family)) tags.add('clean');
-      if (['editorial', 'seal'].includes(family)) tags.add('classic');
-      if (['split', 'band', 'darkline', 'editorial', 'letterhead', 'grid', 'soft', 'pill', 'minimal'].includes(family)) tags.add('photo-left');
-      if (family === 'seal') tags.add('photo-right');
-      if (family === 'minimal') tags.add('minimal');
-      if (['editorial', 'letterhead'].includes(family)) tags.add('editorial');
-      if (family === 'grid') tags.add('grid');
-      if (['soft', 'pill'].includes(family)) tags.add('soft');
-      if (family === 'seal') tags.add('seal');
-      return Array.from(tags);
-    }
-
-    function templateVisualLabels(tpl) {
-      const tags = templateVisualTags(tpl);
-      if (tags.includes('color')) return ['Color'];
-      if (tags.includes('clean')) return ['Clean'];
-      if (tags.includes('classic')) return ['Classic'];
-      return [tpl.category || 'Signature'];
     }
 
     function swatchHtml(tpl) {
@@ -2888,25 +2743,12 @@
         const input = document.querySelector(`[name="${key}"]`);
         if (input) input.value = state[key] || '';
       });
+      const photoInput = $('[name="photo"]');
+      if (photoInput && state.photoSource === 'none') photoInput.value = '';
       updateOutputs();
       renderAvatars();
       renderPresets();
       renderSavedCards();
-    }
-
-    function renderCategories() {
-      const select = $('#category-filter');
-      const categories = Array.from(new Set(templates.map(t => t.category || 'Other'))).sort();
-      select.innerHTML = `<option value="all">All categories</option>` +
-        categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
-      select.value = categoryFilter;
-      const styleFilterEl = $('#style-filter');
-      styleFilterEl.innerHTML = visualFilterOptions.map(([value, label]) =>
-        `<button class="look-button ${styleFilter === value ? 'active' : ''}" type="button" data-style-filter="${escapeHtml(value)}" aria-pressed="${styleFilter === value}">
-          <span class="look-swatch ${escapeHtml(value)}" aria-hidden="true"></span>
-          <span>${escapeHtml(label)}</span>
-        </button>`
-      ).join('');
     }
 
     function render() {
@@ -2916,7 +2758,6 @@
       if (output) output.value = html.trim();
       $('#mode-note').textContent = state.colorMode === 'auto' ? 'Adapts to email app' : 'Fixed appearance';
       renderPreviewMode();
-      renderCategories();
       renderTemplates();
       renderForm();
       saveState();
@@ -3343,6 +3184,15 @@
 
     document.addEventListener('input', (event) => {
       if (!event.target.name) return;
+      if (event.target.name === 'photo') {
+        const value = event.target.value.trim();
+        state.photo = value;
+        state.photoSource = value ? 'url' : 'none';
+        markCustomFields('photo', 'photoSource');
+        saveState();
+        updatePreviewOnly();
+        return;
+      }
       state[event.target.name] = event.target.value;
       markCustomFields(event.target.name);
       saveState();
@@ -3382,6 +3232,15 @@
         return;
       }
       if (event.target.name) {
+        if (event.target.name === 'photo') {
+          const value = event.target.value.trim();
+          state.photo = value;
+          state.photoSource = value ? 'url' : 'none';
+          markCustomFields('photo', 'photoSource');
+          saveState();
+          updatePreviewOnly();
+          return;
+        }
         state[event.target.name] = event.target.value;
         markCustomFields(event.target.name);
         saveState();
@@ -3473,6 +3332,14 @@
     $('#top-save-card').addEventListener('click', saveCurrentCard);
     $('#save-card').addEventListener('click', saveCurrentCard);
     $('#reset-card').addEventListener('click', resetCard);
+    $('#remove-photo').addEventListener('click', () => {
+      state.photo = '';
+      state.photoSource = 'none';
+      markCustomFields('photo', 'photoSource');
+      saveState();
+      render();
+      toast('Image removed');
+    });
 
     function restoreDesigns() {
       hiddenDesigns = [];
@@ -3499,17 +3366,6 @@
     $('#design-search').addEventListener('input', (event) => {
       designSearch = event.target.value;
       renderTemplates();
-    });
-    $('#category-filter').addEventListener('change', (event) => {
-      categoryFilter = event.target.value;
-      renderTemplates();
-    });
-    $('#style-filter').addEventListener('click', (event) => {
-      const button = event.target.closest('[data-style-filter]');
-      if (!button) return;
-      styleFilter = button.dataset.styleFilter;
-      renderTemplates();
-      renderCategories();
     });
     $('#tab-templates').addEventListener('click', () => setMobilePanel('templates'));
     $('#tab-preview').addEventListener('click', () => setMobilePanel('preview'));
