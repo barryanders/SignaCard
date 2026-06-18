@@ -811,12 +811,38 @@
       display: grid;
       gap: 7px;
     }
+    .field:has(.field-reset) {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+    .field:has(.field-reset) input,
+    .field:has(.field-reset) textarea,
+    .field:has(.field-reset) select,
+    .field:has(.field-reset) .field-row,
+    .field:has(.field-reset) .preset-grid {
+      grid-column: 1 / -1;
+    }
+    .field.is-hidden {
+      display: none;
+    }
     .field label {
       font-size: 12px;
       color: var(--muted);
       font-weight: 900;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+    }
+    .field-reset {
+      min-height: 24px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--muted);
+      padding: 0 9px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .field-reset[hidden] {
+      display: none;
     }
     .field input,
     .field textarea,
@@ -1852,6 +1878,12 @@
       state.customFields = Array.from(custom);
     }
 
+    function clearCustomFields(...fields) {
+      const remove = new Set(fields.flat());
+      state.customFields = (Array.isArray(state.customFields) ? state.customFields : [])
+        .filter(field => !remove.has(field));
+    }
+
     function mergeWithoutOverwritingCustomFields(current, incoming) {
       const custom = Array.isArray(current.customFields) ? current.customFields : [];
       const preserved = {};
@@ -1966,6 +1998,21 @@
         cardBg: dark ? '#111214' : '#ffffff',
         textColor: dark ? '#ffffff' : '#111827'
       };
+    }
+
+    function templateUsedFields(tpl = templateMeta()) {
+      const used = new Set([
+        'name', 'title', 'company', 'email', 'phone', 'website',
+        'photo', 'photoSource', 'photoStyle',
+        'accent', 'colorMode', 'preset', 'cardWidth', 'fontScale', 'paddingScale', 'radius',
+        'borderWidth', 'borderStyle', 'borderColor', 'cardBg', 'textColor', 'fontFamily'
+      ]);
+      const id = tpl.id;
+      const family = tpl.family;
+      if (['blueprint'].includes(id) || family === 'grid') used.add('location');
+      if (['nonprofit', 'therapist-calm'].includes(id) || !tpl.family) used.add('tagline');
+      if (['ember', 'corner-office', 'publisher'].includes(id) || family === 'band') used.add('logo');
+      return used;
     }
 
     function templateStateDefaults(tpl, overrides = {}) {
@@ -2783,6 +2830,58 @@
       return html.replace(/width:100%; max-width:\d+px; table-layout:fixed;/, 'width:320px; max-width:320px; table-layout:fixed;');
     }
 
+    function fieldResetKeys(field) {
+      if (field === 'photo') return ['photo', 'photoSource'];
+      return [field];
+    }
+
+    function fieldIsCustomized(field) {
+      const custom = new Set(Array.isArray(state.customFields) ? state.customFields : []);
+      return fieldResetKeys(field).some(key => custom.has(key));
+    }
+
+    function ensureFieldResetButton(field, key) {
+      if (field.querySelector('[data-reset-field]')) return;
+      const label = field.querySelector('label');
+      if (!label) return;
+      label.insertAdjacentHTML('afterend', `<button class="field-reset" type="button" data-reset-field="${key}" hidden>Reset</button>`);
+    }
+
+    function renderFieldControls() {
+      const used = templateUsedFields();
+      document.querySelectorAll('.field').forEach((field) => {
+        const control = field.querySelector('[name]');
+        if (!control || !customizableFields.includes(control.name)) return;
+        const key = control.name;
+        const isRelevant = used.has(key);
+        field.classList.toggle('is-hidden', !isRelevant);
+        ensureFieldResetButton(field, key);
+        const reset = field.querySelector('[data-reset-field]');
+        if (reset) {
+          reset.hidden = !isRelevant || !fieldIsCustomized(key);
+          reset.setAttribute('aria-label', `Reset ${key} to this design's default`);
+        }
+      });
+    }
+
+    function resetField(field) {
+      const tpl = templateMeta();
+      const defaults = templateStateDefaults(tpl, { customFields: state.customFields });
+      if (field === 'photo') {
+        state.photo = defaults.photo;
+        state.photoSource = defaults.photoSource;
+        clearCustomFields('photo', 'photoSource');
+      } else if (field === 'preset') {
+        Object.assign(state, designPresets[defaults.preset] || designPresets.standard, { preset: defaults.preset });
+        clearCustomFields('preset', ...Object.keys(designPresets.standard));
+      } else if (Object.prototype.hasOwnProperty.call(defaults, field)) {
+        state[field] = defaults[field];
+        clearCustomFields(field);
+      }
+      render();
+      toast('Field reset');
+    }
+
     function renderForm() {
       Object.keys(defaultState).forEach((key) => {
         const input = document.querySelector(`[name="${key}"]`);
@@ -2790,6 +2889,7 @@
       });
       const photoInput = $('[name="photo"]');
       if (photoInput && state.photoSource === 'none') photoInput.value = '';
+      renderFieldControls();
       updateOutputs();
       renderAvatars();
       renderPresets();
@@ -2814,6 +2914,7 @@
       if (output) output.value = html.trim();
       renderPreviewMode();
       updateOutputs();
+      renderFieldControls();
       renderAvatars();
       renderPresets();
     }
@@ -3299,6 +3400,11 @@
     });
 
     document.addEventListener('click', (event) => {
+      const resetButton = event.target.closest('[data-reset-field]');
+      if (resetButton) {
+        resetField(resetButton.dataset.resetField);
+        return;
+      }
       const hideButton = event.target.closest('[data-hide-template]');
       if (hideButton) {
         event.stopPropagation();
