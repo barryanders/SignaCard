@@ -2035,7 +2035,7 @@
       if (state.photoStyle === 'circle') radius = size / 2;
       if (state.photoStyle === 'soft') radius = 18;
       if (state.photoStyle === 'square') radius = 0;
-      return `<img src="${src}" width="${size}" height="${size}" alt="" style="display:block; width:${size}px; height:${size}px; border-radius:${radius}px; object-fit:cover; border:1px solid ${borderColor};">`;
+      return `<img src="${src}" width="${size}" height="${size}" alt="" style="display:block; width:${size}px; height:${size}px; margin:0 auto; border-radius:${radius}px; object-fit:cover; border:1px solid ${borderColor};">`;
     }
 
     function logoBlock(c, align = 'left') {
@@ -2119,6 +2119,10 @@
       if (/border-radius:\d+px;/.test(output)) {
         output = output.replace(/border-radius:\d+px;/, `border-radius:${radius}px;`);
       }
+      output = output
+        .replace(/border-radius:\d+px 0 0 \d+px;/g, `border-radius:${radius}px 0 0 ${radius}px;`)
+        .replace(/border-radius:0 \d+px \d+px 0;/g, `border-radius:0 ${radius}px ${radius}px 0;`)
+        .replace(/border-radius:0 0 \d+px \d+px;/g, `border-radius:0 0 ${radius}px ${radius}px;`);
       output = output.replace(/font-size:(\d+)px/g, (_, size) => `font-size:${Math.round(Number(size) * fontScale)}px`);
       output = output.replace(/padding:([0-9]+)px(?: ([0-9]+)px)?/g, (_, a, b) => {
         const first = Math.max(0, Math.round(Number(a) * paddingScale));
@@ -2227,7 +2231,7 @@
               </td>
             </tr></table>
           </td></tr>
-          <tr><td style="background:${accent}; padding:15px 24px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
+          <tr><td style="background:${accent}; padding:15px 24px; border-radius:0 0 20px 20px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
         </table>`;
 
       if (tpl === 'botanical') return `
@@ -2264,7 +2268,7 @@
         <table role="presentation" cellpadding="0" cellspacing="0" style="width:620px; max-width:100%; background:#fffaf0; border:1px solid #f1dca6; border-radius:24px; font-family:Arial, sans-serif; color:#251a12;">
           <tr><td style="padding:0;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-              <td width="150" valign="top" style="background:${accent}; border-radius:24px 0 0 24px; padding:20px;">${imageCell(94, 28, 'rgba(255,255,255,.6)')}</td>
+              <td width="150" valign="middle" align="center" style="background:${accent}; border-radius:24px 0 0 24px; padding:20px; text-align:center; vertical-align:middle;">${imageCell(94, 28, 'rgba(255,255,255,.6)')}</td>
               <td valign="top" style="padding:23px;">
                 <div style="font-size:30px; line-height:1.05; font-weight:900;">${name}</div>
                 <div style="font-size:15px; color:#806b4b; padding-top:4px;">${title} · ${company}</div>
@@ -2456,7 +2460,7 @@
               <div style="display:inline-block; background:${soft(accent, 0.12)}; color:${accent}; padding:7px 10px; border-radius:999px; margin-top:12px; font-size:12px; font-weight:900;">Available for your next move</div>
               <div style="font-size:13px; line-height:1.7; padding-top:13px;">${contactLine({ ...c, text: '#0f172a', muted: '#94a3b8' })}</div>
             </td>
-            <td width="150" valign="top" style="background:#eff6ff; padding:22px; border-radius:0 18px 18px 0;">${imageCell(92, 18, '#bfdbfe')}</td>
+            <td width="150" valign="middle" align="center" style="background:#eff6ff; padding:22px; border-radius:0 18px 18px 0; text-align:center; vertical-align:middle;">${imageCell(92, 18, '#bfdbfe')}</td>
           </tr>
         </table>`;
 
@@ -2660,7 +2664,7 @@
       if (meta.family === 'split') return `
         <table role="presentation" cellpadding="0" cellspacing="0" style="width:640px; max-width:100%; background:${bg}; border:1px solid ${line}; border-radius:18px; font-family:Arial, sans-serif; color:${lightText}; overflow:hidden;">
           <tr>
-            <td width="150" valign="top" style="background:${accent}; padding:22px;">${imageCell(92, 18, 'rgba(255,255,255,.55)')}</td>
+            <td width="150" valign="middle" align="center" style="background:${accent}; padding:22px; border-radius:18px 0 0 18px; text-align:center; vertical-align:middle;">${imageCell(92, 18, 'rgba(255,255,255,.55)')}</td>
             <td valign="top" style="padding:23px;">
               <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${accent}; font-weight:900;">${category}</div>
               <div style="font-size:30px; line-height:1.05; font-weight:900; letter-spacing:-0.04em;">${name}</div>
@@ -2682,7 +2686,7 @@
               </td>
             </tr></table>
           </td></tr>
-          <tr><td style="background:${accent}; padding:13px 24px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
+          <tr><td style="background:${accent}; padding:13px 24px; border-radius:0 0 18px 18px;">${logoBlock({ ...c, inverse: '#ffffff' }, 'center')}</td></tr>
         </table>`;
 
       if (meta.family === 'grid') return `
