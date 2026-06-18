@@ -2684,6 +2684,22 @@
       fitMiniPreviews();
     }
 
+    function scrollActiveTemplateIntoView(behavior = 'smooth') {
+      requestAnimationFrame(() => {
+        const activeCard = document.querySelector('.template-card.active');
+        if (!activeCard) return;
+        const panel = $('#templates-panel');
+        if (panel && panel.clientHeight > 0) {
+          const panelRect = panel.getBoundingClientRect();
+          const activeRect = activeCard.getBoundingClientRect();
+          const targetTop = panel.scrollTop + (activeRect.top - panelRect.top) - ((panel.clientHeight - activeRect.height) / 2);
+          panel.scrollTo({ top: Math.max(0, targetTop), behavior });
+          return;
+        }
+        activeCard.scrollIntoView({ block: 'center', inline: 'nearest', behavior });
+      });
+    }
+
     function fitMiniPreviews() {
       requestAnimationFrame(() => {
         document.querySelectorAll('.mini-preview').forEach((preview) => {
@@ -3120,7 +3136,13 @@
         cardBg: tpl.mode === 'locked-dark' ? '#111214' : '#ffffff',
         textColor: tpl.mode === 'locked-dark' ? '#ffffff' : '#111827'
       });
+      if (designSearch) {
+        designSearch = '';
+        const searchInput = $('#design-search');
+        if (searchInput) searchInput.value = '';
+      }
       render();
+      scrollActiveTemplateIntoView();
       toast(preservingEdits ? 'Shuffled design, kept your edits' : 'Shuffled card');
     }
 
@@ -3388,7 +3410,10 @@
       $('#tab-details').setAttribute('aria-selected', String(panel === 'details'));
       $('#mobile-open-designs').classList.toggle('primary', panel === 'templates');
       $('#mobile-open-details').classList.toggle('primary', panel === 'details');
-      if (panel === 'templates') fitMiniPreviews();
+      if (panel === 'templates') {
+        fitMiniPreviews();
+        scrollActiveTemplateIntoView('auto');
+      }
     }
 
     render();
